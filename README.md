@@ -1,67 +1,63 @@
-# Payload Blank Template
+# Open Knowledge
 
-This template comes configured with the bare minimum to get started on anything you need.
+Course platform built with Next.js 16, Payload 4 (beta), PostgreSQL and Better Auth.
 
-## Quick start
+## Stack
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+| Concern | Choice |
+| --- | --- |
+| App | Next.js 16 (App Router) with Payload embedded at `/admin` |
+| Database | PostgreSQL 18, one schema owned by Payload |
+| Student auth | Better Auth: email + password, magic link, Google, GitHub |
+| Staff auth | Payload (`admins` collection) |
+| Email | nodemailer over SMTP: Mailpit locally, Resend in production |
+| Files | S3 API: SeaweedFS locally, Cloudflare R2 in production |
+| i18n | Payload localization + next-intl (`en` default, `es`, `ca`) |
+| UI | Tailwind CSS 4, shadcn/ui (Base UI), Motion, next-themes |
+| Tooling | pnpm, Biome, Vitest, TypeScript |
 
-## Quick Start - local setup
+## Local development
 
-To spin up this template locally, follow these steps:
+Requirements: Node 24, pnpm, Docker.
 
-### Clone
+```bash
+cp .env.example .env            # then fill PAYLOAD_SECRET and BETTER_AUTH_SECRET (openssl rand -hex 32)
+docker compose up -d            # Postgres, Mailpit, SeaweedFS (+ creates the media bucket)
+pnpm install
+pnpm dev
+```
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+| URL | What |
+| --- | --- |
+| http://localhost:3000 | Site |
+| http://localhost:3000/admin | Payload admin (first visit creates the first admin) |
+| http://localhost:8025 | Mailpit: every email sent locally |
+| http://localhost:8333/media | Public media bucket |
 
-### Development
+Google and GitHub sign-in turn on once their client id and secret are set in `.env`.
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+Reset all local data: `docker compose down -v && docker compose up -d`.
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+## Scripts
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+| Script | Does |
+| --- | --- |
+| `pnpm dev` | Dev server (Payload pushes schema changes automatically) |
+| `pnpm build` | Generates types and import map, then builds |
+| `pnpm lint` / `pnpm format` | Biome check / fix |
+| `pnpm typecheck` | TypeScript |
+| `pnpm test` | Vitest |
+| `pnpm generate:db-schema` | Regenerates the Drizzle schema Better Auth uses |
+| `pnpm payload migrate:create <name>` | Creates a migration from schema changes |
 
-#### Docker (Optional)
+## Deployment (Dokploy)
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
-
-To do so, follow these steps:
-
-- Modify the `MONGODB_URL` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
-
-## How it works
-
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
-
-### Collections
-
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
-
-- #### Users (Authentication)
-
-  Users are auth-enabled collections that have access to the admin panel.
-
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
-
-- #### Media
-
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
-
-### Docker
-
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
-
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
-
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
-
-## Questions
-
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+1. **Database**: create a PostgreSQL database in Dokploy, with backups to S3/R2.
+2. **App**: a Dockerfile application from this repo.
+   - Build args: `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_MEDIA_URL`.
+   - Runtime env: everything in `.env.example`.
+   - Migrations run automatically on boot.
+3. **Email**: Resend SMTP: `SMTP_HOST=smtp.resend.com`, `SMTP_PORT=465`, `SMTP_USER=resend`, `SMTP_PASS=<api key>`, with a verified sending domain.
+4. **Files**: an R2 bucket with a public custom domain (`NEXT_PUBLIC_MEDIA_URL`) and an S3 API token (`S3_*`, `S3_REGION=auto`).
+5. **OAuth**: callback URLs `{BETTER_AUTH_URL}/api/auth/callback/google` and `/github`.
+6. Open `/admin` and create the first admin.

@@ -1,0 +1,10 @@
+.git
+.next
+node_modules
+.env
+.env.*
+!.env.example
+docker
+coverage
+*.log
+.DS_Store

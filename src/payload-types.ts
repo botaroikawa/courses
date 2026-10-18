@@ -60,50 +60,128 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_A29B61E3".
+ */
+export type LexicalNodes_A29B61E3 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_A29B61E3>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'media'>
+  | SerializedQuoteNode<LexicalNodes_A29B61E3>
+  | SerializedRelationshipNode<
+      | 'pages'
+      | 'folders'
+      | 'tags'
+      | 'admins'
+      | 'users'
+      | 'sessions'
+      | 'accounts'
+      | 'verifications'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_A29B61E3, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_A29B61E3, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_A29B61E3>
+  | SerializedListItemNode<LexicalNodes_A29B61E3>
+  | SerializedHeadingNode<LexicalNodes_A29B61E3>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_3DE324E4".
+ */
+export type LexicalNodes_3DE324E4 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_3DE324E4>
+  | SerializedListNode<LexicalNodes_3DE324E4>
+  | SerializedListItemNode<LexicalNodes_3DE324E4>
+  | SerializedHeadingNode<LexicalNodes_3DE324E4, 'h2' | 'h3' | 'h4'>;
 
 export interface Config {
   auth: {
-    users: UserAuthOperations;
+    admins: AdminAuthOperations;
   };
   blocks: {};
   collections: {
-    users: User;
+    pages: Page;
     media: Media;
     folders: Folder;
     tags: Tag;
+    admins: Admin;
+    users: User;
+    sessions: Session;
+    accounts: Account;
+    verifications: Verification;
     'payload-kv': PayloadKv;
+    'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+    'payload-llm-instructions': PayloadLlmInstruction;
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     folders: FoldersSelect<false> | FoldersSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
+    admins: AdminsSelect<false> | AdminsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    sessions: SessionsSelect<false> | SessionsSelect<true>;
+    accounts: AccountsSelect<false> | AccountsSelect<true>;
+    verifications: VerificationsSelect<false> | VerificationsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'payload-llm-instructions': PayloadLlmInstructionsSelect<false> | PayloadLlmInstructionsSelect<true>;
   };
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | 'en' | 'en'[];
-  globals: {};
-  globalsSelect: {};
-  locale: 'en';
-  widgets: {
-    collections: CollectionsWidget;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'ca') | ('en' | 'es' | 'ca')[];
+  globals: {
+    header: Header;
+    footer: Footer;
+    brand: Brand;
+    'payload-jobs-stats': PayloadJobsStat;
   };
-  user: User;
+  globalsSelect: {
+    header: HeaderSelect<false> | HeaderSelect<true>;
+    footer: FooterSelect<false> | FooterSelect<true>;
+    brand: BrandSelect<false> | BrandSelect<true>;
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
+  };
+  locale: 'en' | 'es' | 'ca';
+  widgets: {
+    welcome: WelcomeWidget;
+    collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
+    'upload-dropzone': UploadDropzoneWidget;
+  };
+  user: Admin;
   jobs: {
-    tasks: unknown;
+    tasks: {
+      schedulePublish: TaskSchedulePublish;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
+    };
     workflows: unknown;
   };
 }
-export interface UserAuthOperations {
+export interface AdminAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -121,26 +199,34 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-export interface User {
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
   id: string;
+  title: string;
+  slug: string;
+  content?: LexicalRichText<LexicalNodes_A29B61E3> | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+  };
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
   updatedAt: string;
   createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -151,6 +237,16 @@ export interface Media {
   alt: string;
   _h_folders?: (string | null) | Folder;
   _h_tags?: (string | Tag)[] | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -160,8 +256,50 @@ export interface Media {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
   focalX?: number | null;
   focalY?: number | null;
+  variants?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+    hero?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -171,10 +309,54 @@ export interface Folder {
   id: string;
   _h_folders?: (string | null) | Folder;
   name: string;
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admins".
+ */
+export interface Admin {
+  id: string;
+  name?: string | null;
+  role: 'admin' | 'editor';
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'admins';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -184,11 +366,116 @@ export interface Tag {
   id: string;
   _h_tags?: (string | null) | Tag;
   name: string;
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  emailVerified: boolean;
+  image?: string | null;
+  locale: 'en' | 'es' | 'ca';
+  motionPreference: 'system' | 'reduce' | 'full';
+  themePreference: 'system' | 'light' | 'dark';
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sessions".
+ */
+export interface Session {
+  id: string;
+  user: string | User;
+  token: string;
+  expiresAt: string;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "accounts".
+ */
+export interface Account {
+  id: string;
+  user: string | User;
+  accountId: string;
+  providerId: string;
+  accessToken?: string | null;
+  refreshToken?: string | null;
+  idToken?: string | null;
+  accessTokenExpiresAt?: string | null;
+  refreshTokenExpiresAt?: string | null;
+  scope?: string | null;
+  password?: string | null;
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "verifications".
+ */
+export interface Verification {
+  id: string;
+  identifier: string;
+  value: string;
+  expiresAt: string;
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
 export interface PayloadKv {
   id: string;
   key: string;
@@ -204,14 +491,124 @@ export interface PayloadKv {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs".
+ */
+export interface PayloadJob {
+  id: string;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug: 'inline' | 'schedulePublish';
+        taskID: string;
+        input:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        parent?: {
+          taskSlug?: ('inline' | 'schedulePublish') | null;
+          taskID?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?: ('inline' | 'schedulePublish') | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processingUntil?: string | null;
+  processingToken?: string | null;
+  /**
+   * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
+   */
+  concurrencyKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'users';
-        value: string | User;
+        relationTo: 'pages';
+        value: string | Page;
       } | null)
     | ({
         relationTo: 'media';
@@ -224,11 +621,31 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tags';
         value: string | Tag;
+      } | null)
+    | ({
+        relationTo: 'admins';
+        value: string | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'sessions';
+        value: string | Session;
+      } | null)
+    | ({
+        relationTo: 'accounts';
+        value: string | Account;
+      } | null)
+    | ({
+        relationTo: 'verifications';
+        value: string | Verification;
       } | null);
   globalSlug?: string | null;
   user: {
-    relationTo: 'users';
-    value: string | User;
+    relationTo: 'admins';
+    value: string | Admin;
   };
   updatedAt: string;
   createdAt: string;
@@ -240,8 +657,8 @@ export interface PayloadLockedDocument {
 export interface PayloadPreference {
   id: string;
   user: {
-    relationTo: 'users';
-    value: string | User;
+    relationTo: 'admins';
+    value: string | Admin;
   };
   key?: string | null;
   value?:
@@ -269,25 +686,46 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "payload-llm-instructions".
  */
-export interface UsersSelect<T extends boolean = true> {
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
+export interface PayloadLlmInstruction {
+  id: string;
+  entitySlug: string;
+  title?: string | null;
+  entityType: 'collection' | 'global';
+  additionalInstructions?: LexicalRichText<LexicalNodes_3DE324E4> | null;
+  systemInstructions?: LexicalRichText<LexicalNodes_3DE324E4> | null;
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  content?: T;
+  meta?:
     | T
     | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
+        title?: T;
+        description?: T;
+        image?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -297,6 +735,10 @@ export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   _h_folders?: T;
   _h_tags?: T;
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -306,8 +748,60 @@ export interface MediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
   focalX?: T;
   focalY?: T;
+  variants?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+        hero?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -316,6 +810,8 @@ export interface MediaSelect<T extends boolean = true> {
 export interface FoldersSelect<T extends boolean = true> {
   _h_folders?: T;
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
@@ -328,14 +824,152 @@ export interface FoldersSelect<T extends boolean = true> {
 export interface TagsSelect<T extends boolean = true> {
   _h_tags?: T;
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
   _h_titlePath?: T;
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admins_select".
+ */
+export interface AdminsSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  emailVerified?: T;
+  image?: T;
+  locale?: T;
+  motionPreference?: T;
+  themePreference?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sessions_select".
+ */
+export interface SessionsSelect<T extends boolean = true> {
+  user?: T;
+  token?: T;
+  expiresAt?: T;
+  ipAddress?: T;
+  userAgent?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "accounts_select".
+ */
+export interface AccountsSelect<T extends boolean = true> {
+  user?: T;
+  accountId?: T;
+  providerId?: T;
+  accessToken?: T;
+  refreshToken?: T;
+  idToken?: T;
+  accessTokenExpiresAt?: T;
+  refreshTokenExpiresAt?: T;
+  scope?: T;
+  password?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "verifications_select".
+ */
+export interface VerificationsSelect<T extends boolean = true> {
+  identifier?: T;
+  value?: T;
+  expiresAt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_select".
+ */
+export interface PayloadJobsSelect<T extends boolean = true> {
+  input?: T;
+  taskStatus?: T;
+  meta?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        parent?:
+          | T
+          | {
+              taskSlug?: T;
+              taskID?: T;
+            };
+        id?: T;
+      };
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processingUntil?: T;
+  processingToken?: T;
+  concurrencyKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -371,6 +1005,211 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions_select".
+ */
+export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
+  id?: T;
+  entitySlug?: T;
+  title?: T;
+  entityType?: T;
+  additionalInstructions?: T;
+  systemInstructions?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header".
+ */
+export interface Header {
+  id: string;
+  navItems?:
+    | {
+        label: string;
+        link?: {
+          type?: ('internal' | 'external') | null;
+          newTab?: boolean | null;
+          page?: (string | null) | Page;
+          url?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer".
+ */
+export interface Footer {
+  id: string;
+  navItems?:
+    | {
+        label: string;
+        link?: {
+          type?: ('internal' | 'external') | null;
+          newTab?: boolean | null;
+          page?: (string | null) | Page;
+          url?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  copyright?: string | null;
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brand".
+ */
+export interface Brand {
+  id: string;
+  siteName: string;
+  tagline?: string | null;
+  logo?: (string | null) | Media;
+  /**
+   * Optional variant for dark mode
+   */
+  logoDark?: (string | null) | Media;
+  favicon?: (string | null) | Media;
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats".
+ */
+export interface PayloadJobsStat {
+  id: string;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header_select".
+ */
+export interface HeaderSelect<T extends boolean = true> {
+  navItems?:
+    | T
+    | {
+        label?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              page?: T;
+              url?: T;
+            };
+        id?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer_select".
+ */
+export interface FooterSelect<T extends boolean = true> {
+  navItems?:
+    | T
+    | {
+        label?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              page?: T;
+              url?: T;
+            };
+        id?: T;
+      };
+  copyright?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brand_select".
+ */
+export interface BrandSelect<T extends boolean = true> {
+  siteName?: T;
+  tagline?: T;
+  logo?: T;
+  logoDark?: T;
+  favicon?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats_select".
+ */
+export interface PayloadJobsStatsSelect<T extends boolean = true> {
+  stats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -381,10 +1220,215 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection: 'pages' | 'media' | 'folders' | 'tags' | 'admins' | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?: ('pages' | 'media' | 'folders' | 'tags' | 'admins' | 'users')[] | null;
+  };
+  width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "upload-dropzone_widget".
+ */
+export interface UploadDropzoneWidget {
+  data?: {
+    excludedCollections?: 'media'[] | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSchedulePublish".
+ */
+export interface TaskSchedulePublish {
+  input: {
+    type?: ('publish' | 'unpublish') | null;
+    locale?: string | null;
+    doc?: {
+      relationTo: 'pages';
+      value: string | Page;
+    } | null;
+    global?: string | null;
+    user?: {
+      relationTo: 'admins';
+      value: string | Admin;
+    } | null;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
+  version: number;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
+    version: number;
+  };
 }
 
 

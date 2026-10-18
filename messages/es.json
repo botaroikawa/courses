@@ -1,0 +1,83 @@
+{
+  "common": {
+    "skipToContent": "Saltar al contenido",
+    "signIn": "Iniciar sesión",
+    "account": "Cuenta",
+    "signOut": "Cerrar sesión",
+    "or": "o",
+    "genericError": "Algo ha ido mal. Inténtalo de nuevo."
+  },
+  "preferences": {
+    "title": "Preferencias",
+    "language": "Idioma",
+    "theme": "Tema",
+    "themeSystem": "Sistema",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro",
+    "motion": "Animaciones",
+    "motionDescription": "\"Sistema\" sigue el ajuste de reducir movimiento de tu dispositivo.",
+    "motionSystem": "Sistema",
+    "motionReduce": "Reducidas",
+    "motionFull": "Completas"
+  },
+  "login": {
+    "title": "Iniciar sesión",
+    "description": "Hola de nuevo. Inicia sesión para guardar tu progreso.",
+    "email": "Email",
+    "password": "Contraseña",
+    "submit": "Iniciar sesión",
+    "forgotPassword": "¿Has olvidado tu contraseña?",
+    "magicLink": "Envíame un enlace de acceso",
+    "magicLinkSent": "Revisa tu correo: te hemos enviado un enlace de acceso.",
+    "google": "Continuar con Google",
+    "github": "Continuar con GitHub",
+    "noAccount": "¿No tienes cuenta?",
+    "register": "Crea una",
+    "emailNotVerified": "Primero confirma tu email. Te hemos enviado un enlace de confirmación nuevo."
+  },
+  "register": {
+    "title": "Crea tu cuenta",
+    "description": "Cursos gratuitos y tu progreso guardado.",
+    "name": "Nombre",
+    "email": "Email",
+    "password": "Contraseña",
+    "passwordHint": "Al menos 8 caracteres.",
+    "submit": "Crear cuenta",
+    "haveAccount": "¿Ya tienes cuenta?",
+    "signIn": "Inicia sesión"
+  },
+  "verifyEmail": {
+    "title": "Revisa tu correo",
+    "description": "Te hemos enviado un enlace de confirmación. Ábrelo para terminar de crear tu cuenta."
+  },
+  "forgotPassword": {
+    "title": "Restablece tu contraseña",
+    "description": "Escribe tu email y te enviaremos un enlace para elegir una contraseña nueva.",
+    "email": "Email",
+    "submit": "Enviar enlace",
+    "sent": "Si existe una cuenta con ese email, recibirás un enlace en breve.",
+    "back": "Volver a iniciar sesión"
+  },
+  "resetPassword": {
+    "title": "Elige una contraseña nueva",
+    "description": "Escribe tu nueva contraseña.",
+    "password": "Contraseña nueva",
+    "submit": "Guardar contraseña",
+    "invalidToken": "Este enlace no es válido o ha caducado. Pide uno nuevo.",
+    "done": "Contraseña actualizada. Ya puedes iniciar sesión."
+  },
+  "account": {
+    "title": "Cuenta",
+    "description": "Gestiona tu perfil y tus preferencias.",
+    "profile": "Perfil",
+    "name": "Nombre",
+    "email": "Email",
+    "save": "Guardar",
+    "saved": "Guardado"
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "description": "La página que buscas no existe o se ha movido.",
+    "home": "Ir al inicio"
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "common": {
+    "skipToContent": "Salta al contingut",
+    "signIn": "Inicia la sessió",
+    "account": "Compte",
+    "signOut": "Tanca la sessió",
+    "or": "o",
+    "genericError": "Alguna cosa ha anat malament. Torna-ho a provar."
+  },
+  "preferences": {
+    "title": "Preferències",
+    "language": "Idioma",
+    "theme": "Tema",
+    "themeSystem": "Sistema",
+    "themeLight": "Clar",
+    "themeDark": "Fosc",
+    "motion": "Animacions",
+    "motionDescription": "\"Sistema\" segueix l'ajust de reduir el moviment del teu dispositiu.",
+    "motionSystem": "Sistema",
+    "motionReduce": "Reduïdes",
+    "motionFull": "Completes"
+  },
+  "login": {
+    "title": "Inicia la sessió",
+    "description": "Hola de nou. Inicia la sessió per desar el teu progrés.",
+    "email": "Correu electrònic",
+    "password": "Contrasenya",
+    "submit": "Inicia la sessió",
+    "forgotPassword": "Has oblidat la contrasenya?",
+    "magicLink": "Envia'm un enllaç d'accés",
+    "magicLinkSent": "Revisa el correu: t'hem enviat un enllaç d'accés.",
+    "google": "Continua amb Google",
+    "github": "Continua amb GitHub",
+    "noAccount": "No tens compte?",
+    "register": "Crea'n un",
+    "emailNotVerified": "Primer confirma el teu correu. T'hem enviat un enllaç de confirmació nou."
+  },
+  "register": {
+    "title": "Crea el teu compte",
+    "description": "Cursos gratuïts i el teu progrés desat.",
+    "name": "Nom",
+    "email": "Correu electrònic",
+    "password": "Contrasenya",
+    "passwordHint": "Almenys 8 caràcters.",
+    "submit": "Crea el compte",
+    "haveAccount": "Ja tens compte?",
+    "signIn": "Inicia la sessió"
+  },
+  "verifyEmail": {
+    "title": "Revisa el correu",
+    "description": "T'hem enviat un enllaç de confirmació. Obre'l per acabar de crear el compte."
+  },
+  "forgotPassword": {
+    "title": "Restableix la contrasenya",
+    "description": "Escriu el teu correu i t'enviarem un enllaç per triar una contrasenya nova.",
+    "email": "Correu electrònic",
+    "submit": "Envia l'enllaç",
+    "sent": "Si hi ha un compte amb aquest correu, rebràs un enllaç aviat.",
+    "back": "Torna a iniciar la sessió"
+  },
+  "resetPassword": {
+    "title": "Tria una contrasenya nova",
+    "description": "Escriu la teva contrasenya nova.",
+    "password": "Contrasenya nova",
+    "submit": "Desa la contrasenya",
+    "invalidToken": "Aquest enllaç no és vàlid o ha caducat. Demana'n un de nou.",
+    "done": "Contrasenya actualitzada. Ja pots iniciar la sessió."
+  },
+  "account": {
+    "title": "Compte",
+    "description": "Gestiona el teu perfil i les teves preferències.",
+    "profile": "Perfil",
+    "name": "Nom",
+    "email": "Correu electrònic",
+    "save": "Desa",
+    "saved": "Desat"
+  },
+  "notFound": {
+    "title": "No s'ha trobat la pàgina",
+    "description": "La pàgina que busques no existeix o s'ha mogut.",
+    "home": "Ves a l'inici"
+  }
+}
