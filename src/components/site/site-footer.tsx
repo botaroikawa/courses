@@ -3,8 +3,8 @@ import { getTranslations } from 'next-intl/server'
 import { PreferenceControls } from '@/components/preferences/preference-controls'
 import { Separator } from '@/components/ui/separator'
 import type { Locale } from '@/i18n/routing'
-import { getSiteGlobals } from '@/lib/content'
-import { resolveLink } from '@/lib/links'
+import { getLinkHrefs, getSiteGlobals } from '@/lib/content'
+import { linkRefsIn, resolveLink } from '@/lib/links'
 
 import { NavLink } from './nav-link'
 
@@ -13,6 +13,7 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
     getSiteGlobals(locale),
     getTranslations('preferences'),
   ])
+  const hrefs = await getLinkHrefs(linkRefsIn(footer.navItems), locale)
 
   return (
     <footer className="border-t">
@@ -23,7 +24,7 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
             {brand.tagline && <p className="text-muted-foreground text-sm">{brand.tagline}</p>}
             <nav className="flex flex-wrap gap-4 text-sm">
               {footer.navItems?.map((item) => {
-                const link = resolveLink(item.link)
+                const link = resolveLink(item.link, hrefs)
                 if (!link) return null
                 return (
                   <NavLink

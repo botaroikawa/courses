@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { isStaff, publishedOrStaff } from '@/access'
+import { contentEditor } from '@/editor'
 import { isLocale } from '@/i18n/routing'
 import { pagePath } from '@/lib/paths'
 
@@ -43,6 +44,6 @@ export const Pages: CollectionConfig = {
     // Shared by every locale and written in English: URLs are English everywhere.
     // `home` is rendered at the site root.
     { name: 'slug', type: 'slug', useAsSlug: 'title' },
-    { name: 'content', type: 'richText', localized: true },
+    { name: 'content', type: 'richText', localized: true, editor: contentEditor },
   ],
 }

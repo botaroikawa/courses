@@ -1,10 +1,10 @@
-import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Metadata } from 'next'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { hasLocale } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
 
+import { RichText } from '@/components/rich-text'
 import { LivePreviewListener } from '@/components/site/live-preview-listener'
 import { routing } from '@/i18n/routing'
 import { getPage, getPublishedLocales, mediaOf } from '@/lib/content'
@@ -53,7 +53,7 @@ export default async function PayloadPage({ params }: Props) {
     <article className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-12">
       {isDraft && <LivePreviewListener />}
       <h1 className="font-semibold text-4xl tracking-tight">{page.title}</h1>
-      {page.content && <RichText data={page.content} className="flex flex-col gap-4 leading-7" />}
+      <RichText data={page.content} />
     </article>
   )
 }

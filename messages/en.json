@@ -79,5 +79,26 @@
     "title": "Page not found",
     "description": "The page you're looking for doesn't exist or has moved.",
     "home": "Go home"
+  },
+  "content": {
+    "tableOfContents": "On this page",
+    "copyCode": "Copy code",
+    "copied": "Copied",
+    "image": "Image",
+    "enlargeImage": "Enlarge image",
+    "enlargeImageNamed": "Enlarge image: {alt}",
+    "videoUnsupported": "Your browser can't play this video.",
+    "plotCurve": "y = {expression}{label, select, empty {} other { ({label})}}",
+    "plotPoint": "Point at ({x}, {y}){label, select, empty {} other {: {label}}}",
+    "callout": {
+      "info": "Note",
+      "tip": "Tip",
+      "warning": "Warning",
+      "danger": "Danger"
+    },
+    "funnel": {
+      "ofPrevious": "{rate} of the previous step",
+      "overall": "Overall conversion: {rate}"
+    }
   }
 }

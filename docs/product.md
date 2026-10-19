@@ -2,7 +2,7 @@
 
 Open Knowledge is a course platform. Lessons are mostly written text with images and interactive components; a few embed video. Every course is free today; paid access is planned.
 
-**Status (2026-10-19):** courses, lessons, categories and instructors can be edited in `/admin`, and student data is limited to admins. The public pages, enrollment, progress and quizzes are designed, not built. Mark a section as built when its phase lands.
+**Status (2026-10-19):** courses, lessons, categories and instructors can be edited in `/admin` with the shared editor and its blocks, and student data is limited to admins. The public pages, enrollment, progress and quizzes are designed, not built. Mark a section as built when its phase lands.
 
 ## People
 

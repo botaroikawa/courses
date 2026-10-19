@@ -2,14 +2,15 @@ import Image from 'next/image'
 
 import { Link } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
-import { getSiteGlobals, mediaOf } from '@/lib/content'
-import { resolveLink } from '@/lib/links'
+import { getLinkHrefs, getSiteGlobals, mediaOf } from '@/lib/content'
+import { linkRefsIn, resolveLink } from '@/lib/links'
 
 import { AccountButton } from './account-button'
 import { NavLink } from './nav-link'
 
 export async function SiteHeader({ locale }: { locale: Locale }) {
   const { header, brand } = await getSiteGlobals(locale)
+  const hrefs = await getLinkHrefs(linkRefsIn(header.navItems), locale)
   const logo = mediaOf(brand.logo)
   const logoDark = mediaOf(brand.logoDark)
 
@@ -42,7 +43,7 @@ export async function SiteHeader({ locale }: { locale: Locale }) {
         </Link>
         <nav className="flex flex-1 items-center gap-4 text-sm">
           {header.navItems?.map((item) => {
-            const link = resolveLink(item.link)
+            const link = resolveLink(item.link, hrefs)
             if (!link) return null
             return (
               <NavLink

@@ -2,16 +2,37 @@ import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 import { slugify } from 'payload/shared'
 
 import { freePreviewOrStaff, isStaff } from '@/access'
+import { contentEditor } from '@/editor'
 import { firstPublishedAtField } from '@/fields/first-published-at'
 import { validateLessonSlug } from '@/lib/course-lessons'
 import { relationId } from '@/lib/courses'
 import { countWords, readingMinutes } from '@/lib/reading-time'
-import type { Lesson } from '@/payload-types'
+import { blockFieldsOf } from '@/lib/rich-text'
+import type { Lesson, VideoBlock } from '@/payload-types'
 
-const setReadingTime: CollectionBeforeChangeHook<Lesson> = ({ data, req }) => {
+const setReadingTime: CollectionBeforeChangeHook<Lesson> = async ({ data, req }) => {
   // With locale "all" the content arrives keyed by locale
   if (data.content === undefined || req.locale === 'all') return data
-  data.readingTime = readingMinutes({ words: countWords(data.content) })
+  const videoIds = blockFieldsOf<VideoBlock>(data.content, 'video').flatMap(({ video }) =>
+    video ? [typeof video === 'object' ? video.id : video] : [],
+  )
+  const { docs: videos } = videoIds.length
+    ? await req.payload.find({
+        collection: 'media',
+        where: { id: { in: videoIds } },
+        select: { duration: true },
+        depth: 0,
+        pagination: false,
+        overrideAccess: true,
+        req,
+      })
+    : { docs: [] }
+  // A video used twice plays twice
+  const seconds = videoIds.reduce(
+    (total, id) => total + (videos.find((video) => video.id === id)?.duration ?? 0),
+    0,
+  )
+  data.readingTime = readingMinutes({ words: countWords(data.content), videoSeconds: seconds })
   return data
 }
 
@@ -55,7 +76,7 @@ export const Lessons: CollectionConfig = {
               localized: true,
               admin: { description: 'Shown in the course syllabus and in search results.' },
             },
-            { name: 'content', type: 'richText', localized: true },
+            { name: 'content', type: 'richText', localized: true, editor: contentEditor },
           ],
         },
       ],
@@ -109,7 +130,7 @@ export const Lessons: CollectionConfig = {
       admin: {
         readOnly: true,
         position: 'sidebar',
-        description: 'Minutes, computed on save.',
+        description: 'Minutes, computed on save from the text and the videos.',
       },
     },
     firstPublishedAtField,

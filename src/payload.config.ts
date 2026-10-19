@@ -3,7 +3,6 @@ import { fileURLToPath } from 'node:url'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { seoPlugin } from '@payloadcms/plugin-seo'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { s3Storage } from '@payloadcms/storage-s3'
 import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import { buildConfig } from 'payload'
@@ -18,6 +17,7 @@ import { Lessons } from './collections/lessons'
 import { Media } from './collections/media'
 import { Pages } from './collections/pages'
 import { Tags } from './collections/tags'
+import { basicEditor } from './editor'
 import { env } from './env'
 import { Brand } from './globals/brand'
 import { Footer } from './globals/footer'
@@ -54,7 +54,8 @@ export default buildConfig({
     Verifications,
   ],
   globals: [Header, Footer, Brand],
-  editor: lexicalEditor(),
+  // Short texts; lessons and pages use the shared contentEditor (docs/editor.md)
+  editor: basicEditor,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

@@ -12,7 +12,7 @@ Read the doc before changing its area:
 
 - `docs/product.md`: people and roles, concepts (course, lesson, enrollment, progress, quiz), access, journeys, languages, SEO, planned work.
 - `docs/content-model.md`: collections, relationships, invariants, localization strategy, student data, deletions.
-- `docs/editor.md`: the shared Lexical editor and its blocks, table of contents, reading time, checklist for adding a block.
+- `docs/editor.md`: the shared Lexical editor and its blocks, internal links, table of contents, reading time, checklist for adding a block.
 - `docs/media.md`: files, visibility, video, paid-access plan.
 
 Update the doc in the same change as the code. When a product change contradicts a doc, rewrite the doc to the new truth and follow every seam it lists, so nothing is left half-migrated. A new area gets its own doc and a line here.
@@ -45,10 +45,11 @@ Schema changes reach production as migrations: `pnpm payload migrate:create <nam
 
 ## UI and motion
 
+- Build UI from shadcn/ui components and shadcn charts whenever one fits; hand-build only what shadcn lacks.
 - shadcn/ui on Base UI (`render` prop, not `asChild`). `src/components/ui` holds upstream copies, excluded from Biome; add components with `pnpm dlx shadcn@latest add`.
 - Every animation honours reduced motion. `<html data-motion>` holds the visitor's choice (`system | reduce | full`):
   - CSS: use the `motion-safe:` / `motion-reduce:` variants from `src/styles/globals.css`, which read `data-motion` as well as the OS setting.
-  - Motion (JS): `<MotionConfig>` in `src/components/preferences/motion-provider.tsx` already applies it; for custom logic read `useReducedMotion()` from `motion/react`.
+  - Motion (JS): `<MotionConfig>` in `src/components/preferences/motion-provider.tsx` already applies it; for custom logic read `useReducedMotionConfig()` from `motion/react` (`useReducedMotion()` ignores the visitor's manual choice).
 - When the motion/animation or shadcn skills are installed, use them for UI work.
 
 ## Environment

@@ -62,40 +62,62 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_21352ABF".
+ * via the `definition` "LexicalNodes_A6478850".
  */
-export type LexicalNodes_21352ABF =
+export type LexicalNodes_A6478850 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_21352ABF>
-  | SerializedHorizontalRuleNode
-  | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_21352ABF>
-  | SerializedRelationshipNode<
-      | 'courses'
-      | 'lessons'
-      | 'categories'
-      | 'instructors'
-      | 'pages'
-      | 'folders'
-      | 'tags'
-      | 'admins'
-      | 'users'
-      | 'sessions'
-      | 'accounts'
-      | 'verifications'
-      | 'payload-kv'
-      | 'payload-jobs'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
+  | SerializedParagraphNode<LexicalNodes_A6478850>
+  | SerializedAutoLinkNode<LexicalNodes_A6478850, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_A6478850, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_A6478850>
+  | SerializedListItemNode<LexicalNodes_A6478850>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_348E6AC5".
+ */
+export type LexicalNodes_348E6AC5 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_348E6AC5>
+  | SerializedBlockNode<CodeBlock>
+  | SerializedUploadNode<'media', LexicalUploadFields_7C90EEAC>
+  | SerializedAutoLinkNode<LexicalNodes_348E6AC5, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_348E6AC5, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_348E6AC5>
+  | SerializedListItemNode<LexicalNodes_348E6AC5>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_816CE715".
+ */
+export type LexicalNodes_816CE715 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_816CE715>
+  | SerializedBlockNode<
+      | LinkBlock
+      | CodeBlock
+      | CalloutBlock
+      | VideoBlock
+      | ChartBlock
+      | FunctionPlotBlock
+      | FunnelBlock
+      | CollapsibleBlock
     >
-  | SerializedAutoLinkNode<LexicalNodes_21352ABF, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_21352ABF, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_21352ABF>
-  | SerializedListItemNode<LexicalNodes_21352ABF>
-  | SerializedHeadingNode<LexicalNodes_21352ABF>;
+  | SerializedUploadNode<'media', LexicalUploadFields_7C90EEAC>
+  | SerializedTableNode<LexicalNodes_816CE715>
+  | SerializedTableCellNode<LexicalNodes_816CE715>
+  | SerializedTableRowNode<LexicalNodes_816CE715>
+  | SerializedHorizontalRuleNode
+  | SerializedQuoteNode<LexicalNodes_816CE715>
+  | SerializedHeadingNode<LexicalNodes_816CE715, 'h2' | 'h3' | 'h4'>
+  | SerializedAutoLinkNode<LexicalNodes_816CE715, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_816CE715, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_816CE715>
+  | SerializedListItemNode<LexicalNodes_816CE715>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_3DE324E4".
@@ -225,7 +247,7 @@ export interface Course {
    */
   summary: string;
   cover?: (string | null) | Media;
-  description?: LexicalRichText<LexicalNodes_21352ABF> | null;
+  description?: LexicalRichText<LexicalNodes_A6478850> | null;
   outcomes?:
     | {
         text: string;
@@ -457,7 +479,7 @@ export interface Lesson {
    * Shown in the course syllabus and in search results.
    */
   summary?: string | null;
-  content?: LexicalRichText<LexicalNodes_21352ABF> | null;
+  content?: LexicalRichText<LexicalNodes_816CE715> | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -479,7 +501,7 @@ export interface Lesson {
    */
   freePreview?: boolean | null;
   /**
-   * Minutes, computed on save.
+   * Minutes, computed on save from the text and the videos.
    */
   readingTime?: number | null;
   firstPublishedAt?: string | null;
@@ -532,7 +554,7 @@ export interface Instructor {
    */
   headline?: string | null;
   photo?: (string | null) | Media;
-  bio?: LexicalRichText<LexicalNodes_21352ABF> | null;
+  bio?: LexicalRichText<LexicalNodes_A6478850> | null;
   links?:
     | {
         label: string;
@@ -559,7 +581,7 @@ export interface Page {
   id: string;
   title: string;
   slug: string;
-  content?: LexicalRichText<LexicalNodes_21352ABF> | null;
+  content?: LexicalRichText<LexicalNodes_816CE715> | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -1367,7 +1389,22 @@ export interface Header {
         link?: {
           type?: ('internal' | 'external') | null;
           newTab?: boolean | null;
-          page?: (string | null) | Page;
+          doc?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'courses';
+                value: string | Course;
+              } | null)
+            | ({
+                relationTo: 'lessons';
+                value: string | Lesson;
+              } | null);
+          /**
+           * A full URL, or a path on this site such as /courses (without the language).
+           */
           url?: string | null;
         };
         id?: string | null;
@@ -1396,7 +1433,22 @@ export interface Footer {
         link?: {
           type?: ('internal' | 'external') | null;
           newTab?: boolean | null;
-          page?: (string | null) | Page;
+          doc?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'courses';
+                value: string | Course;
+              } | null)
+            | ({
+                relationTo: 'lessons';
+                value: string | Lesson;
+              } | null);
+          /**
+           * A full URL, or a path on this site such as /courses (without the language).
+           */
           url?: string | null;
         };
         id?: string | null;
@@ -1471,7 +1523,7 @@ export interface HeaderSelect<T extends boolean = true> {
           | {
               type?: T;
               newTab?: T;
-              page?: T;
+              doc?: T;
               url?: T;
             };
         id?: T;
@@ -1496,7 +1548,7 @@ export interface FooterSelect<T extends boolean = true> {
           | {
               type?: T;
               newTab?: T;
-              page?: T;
+              doc?: T;
               url?: T;
             };
         id?: T;
@@ -1651,6 +1703,201 @@ export interface TaskSchedulePublish {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LinkBlock".
+ */
+export interface LinkBlock {
+  id: string;
+  blockType: 'link';
+  label: string;
+  link: {
+    type?: ('internal' | 'external') | null;
+    newTab?: boolean | null;
+    doc?:
+      | ({
+          relationTo: 'pages';
+          value: string | Page;
+        } | null)
+      | ({
+          relationTo: 'courses';
+          value: string | Course;
+        } | null)
+      | ({
+          relationTo: 'lessons';
+          value: string | Lesson;
+        } | null);
+    /**
+     * A full URL, or a path on this site such as /courses (without the language).
+     */
+    url?: string | null;
+    appearance: 'link' | 'button';
+    variant?: ('default' | 'secondary' | 'outline' | 'ghost') | null;
+    size?: ('sm' | 'default' | 'lg') | null;
+  };
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CodeBlock".
+ */
+export interface CodeBlock {
+  id: string;
+  blockType: 'code';
+  language?:
+    | (
+        | 'typescript'
+        | 'javascript'
+        | 'json'
+        | 'html'
+        | 'css'
+        | 'shell'
+        | 'python'
+        | 'sql'
+        | 'yaml'
+        | 'markdown'
+        | 'java'
+        | 'go'
+        | 'rust'
+        | 'php'
+        | 'csharp'
+        | 'cpp'
+        | 'plaintext'
+      )
+    | null;
+  filename?: string | null;
+  code?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_7C90EEAC".
+ */
+export interface LexicalUploadFields_7C90EEAC {
+  caption?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CalloutBlock".
+ */
+export interface CalloutBlock {
+  id: string;
+  blockType: 'callout';
+  kind: 'info' | 'tip' | 'warning' | 'danger';
+  title?: string | null;
+  content: LexicalRichText<LexicalNodes_348E6AC5>;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VideoBlock".
+ */
+export interface VideoBlock {
+  id: string;
+  blockType: 'video';
+  /**
+   * Its duration adds to the lesson reading time.
+   */
+  video: string | Media;
+  caption?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ChartBlock".
+ */
+export interface ChartBlock {
+  id: string;
+  blockType: 'chart';
+  type: 'bar' | 'line' | 'area' | 'pie';
+  /**
+   * Labels or categories. The first column when empty.
+   */
+  xColumn?: string | null;
+  title?: string | null;
+  /**
+   * A header row, then one row per point. Every column but the x-axis one is a series of numbers. Pie charts take one series.
+   */
+  data: string;
+  caption?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FunctionPlotBlock".
+ */
+export interface FunctionPlotBlock {
+  id: string;
+  blockType: 'functionPlot';
+  xMin: number;
+  xMax: number;
+  yMin: number;
+  yMax: number;
+  xLabel?: string | null;
+  yLabel?: string | null;
+  hideNumbers?: boolean | null;
+  curves?:
+    | {
+        /**
+         * In x: + - * / ^, pi, e, sin, cos, sqrt, ln, log…
+         */
+        expression: string;
+        label?: string | null;
+        shade?: ('none' | 'above' | 'below') | null;
+        /**
+         * Left end. The plot edge when empty.
+         */
+        shadeFrom?: number | null;
+        /**
+         * Right end. The plot edge when empty.
+         */
+        shadeTo?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  points?:
+    | {
+        x: number;
+        y: number;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  caption?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FunnelBlock".
+ */
+export interface FunnelBlock {
+  id: string;
+  blockType: 'funnel';
+  /**
+   * Give every stage a value to show conversion rates, or none for a conceptual funnel.
+   */
+  stages?:
+    | {
+        label: string;
+        value?: number | null;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  caption?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CollapsibleBlock".
+ */
+export interface CollapsibleBlock {
+  id: string;
+  blockType: 'collapsible';
+  title: string;
+  content: LexicalRichText<LexicalNodes_348E6AC5>;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
@@ -1708,42 +1955,6 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
   textStyle: string;
 }
 
-export interface SerializedHorizontalRuleNode {
-  type: 'horizontalrule';
-  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
-  version: number;
-}
-
-export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
-  type: 'upload';
-  format: LexicalElementFormat;
-  id: string;
-  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
-  version: number;
-  fields: TFields;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
-  };
-}[TSlugs];
-
-export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
-  type: 'quote';
-}
-
-export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
-  type: 'relationship';
-  format: LexicalElementFormat;
-  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
-  version: number;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
-  };
-}[TSlugs];
-
 export interface LexicalLinkFields {
   [k: string]: unknown;
   doc?: {
@@ -1778,14 +1989,6 @@ export interface SerializedListItemNode<TChildren> extends SerializedLexicalElem
   value: number;
 }
 
-export interface SerializedHeadingNode<
-  TChildren,
-  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
-> extends SerializedLexicalElementBase<TChildren> {
-  type: 'heading';
-  tag: TTag;
-}
-
 /** Shape of a Lexical `richText` field. */
 export interface LexicalRichText<TNode> {
   root: {
@@ -1797,6 +2000,73 @@ export interface LexicalRichText<TNode> {
     /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
     version: number;
   };
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedTableNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'table';
+  colWidths?: number[];
+  frozenColumnCount?: number;
+  frozenRowCount?: number;
+  rowStriping?: boolean;
+}
+export interface SerializedTableRowNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'tablerow';
+  height?: number;
+}
+export interface SerializedTableCellNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'tablecell';
+  backgroundColor?: string | null;
+  colSpan?: number;
+  headerState: number;
+  rowSpan?: number;
+  verticalAlign?: string;
+  width?: number;
+}
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
+  version: number;
+}
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
 }
 
 

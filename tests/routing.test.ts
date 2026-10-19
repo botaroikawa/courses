@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { resolveLink } from '@/lib/links'
+import { hrefsFor, linkRefsIn, resolveLink } from '@/lib/links'
 import { HOME_SLUG, pagePath } from '@/lib/paths'
 import { safeRedirect } from '@/lib/redirects'
-import type { Page } from '@/payload-types'
 
 describe('pagePath', () => {
   it('serves the default locale without prefix', () => {
@@ -29,28 +28,71 @@ describe('safeRedirect', () => {
   })
 })
 
-describe('resolveLink', () => {
-  const page = { slug: 'about' } as Page
+describe('internal links', () => {
+  const hrefs = hrefsFor({
+    pages: [
+      { id: 'p1', slug: 'about' },
+      { id: 'p2', slug: HOME_SLUG },
+    ],
+    courses: [{ id: 'c1', slug: 'design' }],
+    lessons: [
+      { id: 'l1', slug: 'colour', course: 'c1' },
+      // Its course is not reachable in this locale
+      { id: 'l2', slug: 'type', course: 'c9' },
+    ],
+  })
+  const to = (relationTo: string, value: unknown) => ({
+    type: 'internal' as const,
+    doc: { relationTo, value },
+  })
 
-  it('builds locale-less hrefs for internal pages', () => {
-    expect(resolveLink({ type: 'internal', page })).toEqual({
+  it('builds locale-less hrefs for pages, courses and lessons', () => {
+    expect(resolveLink(to('pages', 'p1'), hrefs)).toEqual({
       kind: 'internal',
       href: '/about',
       newTab: false,
     })
-    expect(resolveLink({ type: 'internal', page: { slug: HOME_SLUG } as Page })?.href).toBe('/')
+    expect(resolveLink(to('pages', 'p2'), hrefs)?.href).toBe('/')
+    expect(resolveLink(to('courses', 'c1'), hrefs)?.href).toBe('/courses/design')
+    expect(resolveLink(to('lessons', { id: 'l1' }), hrefs)?.href).toBe('/courses/design/colour')
   })
 
-  it('drops internal links whose page is not readable', () => {
-    // Unpublished pages come back as a bare id when populated by an anonymous visitor
-    expect(resolveLink({ type: 'internal', page: 'some-id' })).toBeNull()
+  it('drops targets that are not reachable', () => {
+    expect(resolveLink(to('lessons', 'l2'), hrefs)).toBeNull()
+    expect(resolveLink(to('pages', 'unpublished'), hrefs)).toBeNull()
   })
 
   it('passes external URLs through', () => {
-    expect(resolveLink({ type: 'external', url: 'https://example.com', newTab: true })).toEqual({
-      kind: 'external',
-      href: 'https://example.com',
-      newTab: true,
-    })
+    expect(
+      resolveLink({ type: 'external', url: 'https://example.com', newTab: true }, hrefs),
+    ).toEqual({ kind: 'external', href: 'https://example.com', newTab: true })
+    expect(resolveLink({ type: 'external', url: '/courses' }, hrefs)?.kind).toBe('internal')
+    expect(resolveLink({ type: 'external', url: '//evil.com' }, hrefs)?.kind).toBe('external')
+  })
+
+  it('finds every target in a value, once', () => {
+    const content = {
+      root: {
+        children: [
+          {
+            type: 'link',
+            fields: { linkType: 'internal', doc: { relationTo: 'pages', value: 'p1' } },
+          },
+          {
+            type: 'block',
+            fields: {
+              blockType: 'link',
+              link: { doc: { relationTo: 'lessons', value: { id: 'l1' } } },
+            },
+          },
+          { type: 'upload', relationTo: 'media', value: 'm1' },
+          { type: 'link', fields: { doc: { relationTo: 'pages', value: 'p1' } } },
+        ],
+      },
+    }
+    expect(linkRefsIn(content)).toEqual([
+      { relationTo: 'pages', id: 'p1' },
+      { relationTo: 'lessons', id: 'l1' },
+    ])
   })
 })

@@ -3376,15 +3376,11 @@ export const header_nav_items = pgTable(
     id: varchar("id").primaryKey(),
     link_type: enum_header_nav_items_link_type("link_type").default("internal"),
     link_newTab: boolean("link_new_tab"),
-    link_page: uuid("link_page_id").references(() => pages.id, {
-      onDelete: "set null",
-    }),
     link_url: varchar("link_url"),
   },
   (columns) => [
     index("header_nav_items_order_idx").on(columns._order),
     index("header_nav_items_parent_id_idx").on(columns._parentID),
-    index("header_nav_items_link_link_page_idx").on(columns.link_page),
     foreignKey({
       columns: [columns["_parentID"]],
       foreignColumns: [header.id],
@@ -3435,17 +3431,38 @@ export const header_rels = pgTable(
     order: integer("order"),
     parent: uuid("parent_id").notNull(),
     path: varchar("path").notNull(),
+    pagesID: uuid("pages_id"),
+    coursesID: uuid("courses_id"),
+    lessonsID: uuid("lessons_id"),
     adminsID: uuid("admins_id"),
   },
   (columns) => [
     index("header_rels_order_idx").on(columns.order),
     index("header_rels_parent_idx").on(columns.parent),
     index("header_rels_path_idx").on(columns.path),
+    index("header_rels_pages_id_idx").on(columns.pagesID),
+    index("header_rels_courses_id_idx").on(columns.coursesID),
+    index("header_rels_lessons_id_idx").on(columns.lessonsID),
     index("header_rels_admins_id_idx").on(columns.adminsID),
     foreignKey({
       columns: [columns["parent"]],
       foreignColumns: [header.id],
       name: "header_rels_parent_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["pagesID"]],
+      foreignColumns: [pages.id],
+      name: "header_rels_pages_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["coursesID"]],
+      foreignColumns: [courses.id],
+      name: "header_rels_courses_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["lessonsID"]],
+      foreignColumns: [lessons.id],
+      name: "header_rels_lessons_fk",
     }).onDelete("cascade"),
     foreignKey({
       columns: [columns["adminsID"]],
@@ -3466,18 +3483,12 @@ export const _header_v_version_nav_items = pgTable(
         "internal",
       ),
     link_newTab: boolean("link_new_tab"),
-    link_page: uuid("link_page_id").references(() => pages.id, {
-      onDelete: "set null",
-    }),
     link_url: varchar("link_url"),
     _uuid: varchar("_uuid"),
   },
   (columns) => [
     index("_header_v_version_nav_items_order_idx").on(columns._order),
     index("_header_v_version_nav_items_parent_id_idx").on(columns._parentID),
-    index("_header_v_version_nav_items_link_link_page_idx").on(
-      columns.link_page,
-    ),
     foreignKey({
       columns: [columns["_parentID"]],
       foreignColumns: [_header_v.id],
@@ -3548,17 +3559,38 @@ export const _header_v_rels = pgTable(
     order: integer("order"),
     parent: uuid("parent_id").notNull(),
     path: varchar("path").notNull(),
+    pagesID: uuid("pages_id"),
+    coursesID: uuid("courses_id"),
+    lessonsID: uuid("lessons_id"),
     adminsID: uuid("admins_id"),
   },
   (columns) => [
     index("_header_v_rels_order_idx").on(columns.order),
     index("_header_v_rels_parent_idx").on(columns.parent),
     index("_header_v_rels_path_idx").on(columns.path),
+    index("_header_v_rels_pages_id_idx").on(columns.pagesID),
+    index("_header_v_rels_courses_id_idx").on(columns.coursesID),
+    index("_header_v_rels_lessons_id_idx").on(columns.lessonsID),
     index("_header_v_rels_admins_id_idx").on(columns.adminsID),
     foreignKey({
       columns: [columns["parent"]],
       foreignColumns: [_header_v.id],
       name: "_header_v_rels_parent_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["pagesID"]],
+      foreignColumns: [pages.id],
+      name: "_header_v_rels_pages_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["coursesID"]],
+      foreignColumns: [courses.id],
+      name: "_header_v_rels_courses_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["lessonsID"]],
+      foreignColumns: [lessons.id],
+      name: "_header_v_rels_lessons_fk",
     }).onDelete("cascade"),
     foreignKey({
       columns: [columns["adminsID"]],
@@ -3576,15 +3608,11 @@ export const footer_nav_items = pgTable(
     id: varchar("id").primaryKey(),
     link_type: enum_footer_nav_items_link_type("link_type").default("internal"),
     link_newTab: boolean("link_new_tab"),
-    link_page: uuid("link_page_id").references(() => pages.id, {
-      onDelete: "set null",
-    }),
     link_url: varchar("link_url"),
   },
   (columns) => [
     index("footer_nav_items_order_idx").on(columns._order),
     index("footer_nav_items_parent_id_idx").on(columns._parentID),
-    index("footer_nav_items_link_link_page_idx").on(columns.link_page),
     foreignKey({
       columns: [columns["_parentID"]],
       foreignColumns: [footer.id],
@@ -3656,17 +3684,38 @@ export const footer_rels = pgTable(
     order: integer("order"),
     parent: uuid("parent_id").notNull(),
     path: varchar("path").notNull(),
+    pagesID: uuid("pages_id"),
+    coursesID: uuid("courses_id"),
+    lessonsID: uuid("lessons_id"),
     adminsID: uuid("admins_id"),
   },
   (columns) => [
     index("footer_rels_order_idx").on(columns.order),
     index("footer_rels_parent_idx").on(columns.parent),
     index("footer_rels_path_idx").on(columns.path),
+    index("footer_rels_pages_id_idx").on(columns.pagesID),
+    index("footer_rels_courses_id_idx").on(columns.coursesID),
+    index("footer_rels_lessons_id_idx").on(columns.lessonsID),
     index("footer_rels_admins_id_idx").on(columns.adminsID),
     foreignKey({
       columns: [columns["parent"]],
       foreignColumns: [footer.id],
       name: "footer_rels_parent_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["pagesID"]],
+      foreignColumns: [pages.id],
+      name: "footer_rels_pages_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["coursesID"]],
+      foreignColumns: [courses.id],
+      name: "footer_rels_courses_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["lessonsID"]],
+      foreignColumns: [lessons.id],
+      name: "footer_rels_lessons_fk",
     }).onDelete("cascade"),
     foreignKey({
       columns: [columns["adminsID"]],
@@ -3687,18 +3736,12 @@ export const _footer_v_version_nav_items = pgTable(
         "internal",
       ),
     link_newTab: boolean("link_new_tab"),
-    link_page: uuid("link_page_id").references(() => pages.id, {
-      onDelete: "set null",
-    }),
     link_url: varchar("link_url"),
     _uuid: varchar("_uuid"),
   },
   (columns) => [
     index("_footer_v_version_nav_items_order_idx").on(columns._order),
     index("_footer_v_version_nav_items_parent_id_idx").on(columns._parentID),
-    index("_footer_v_version_nav_items_link_link_page_idx").on(
-      columns.link_page,
-    ),
     foreignKey({
       columns: [columns["_parentID"]],
       foreignColumns: [_footer_v.id],
@@ -3790,17 +3833,38 @@ export const _footer_v_rels = pgTable(
     order: integer("order"),
     parent: uuid("parent_id").notNull(),
     path: varchar("path").notNull(),
+    pagesID: uuid("pages_id"),
+    coursesID: uuid("courses_id"),
+    lessonsID: uuid("lessons_id"),
     adminsID: uuid("admins_id"),
   },
   (columns) => [
     index("_footer_v_rels_order_idx").on(columns.order),
     index("_footer_v_rels_parent_idx").on(columns.parent),
     index("_footer_v_rels_path_idx").on(columns.path),
+    index("_footer_v_rels_pages_id_idx").on(columns.pagesID),
+    index("_footer_v_rels_courses_id_idx").on(columns.coursesID),
+    index("_footer_v_rels_lessons_id_idx").on(columns.lessonsID),
     index("_footer_v_rels_admins_id_idx").on(columns.adminsID),
     foreignKey({
       columns: [columns["parent"]],
       foreignColumns: [_footer_v.id],
       name: "_footer_v_rels_parent_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["pagesID"]],
+      foreignColumns: [pages.id],
+      name: "_footer_v_rels_pages_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["coursesID"]],
+      foreignColumns: [courses.id],
+      name: "_footer_v_rels_courses_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["lessonsID"]],
+      foreignColumns: [lessons.id],
+      name: "_footer_v_rels_lessons_fk",
     }).onDelete("cascade"),
     foreignKey({
       columns: [columns["adminsID"]],
@@ -5228,11 +5292,6 @@ export const relations_header_nav_items = relations(
     _locales: many(header_nav_items_locales, {
       relationName: "_locales",
     }),
-    link_page: one(pages, {
-      fields: [header_nav_items.link_page],
-      references: [pages.id],
-      relationName: "link_page",
-    }),
   }),
 );
 export const relations_header_rels = relations(header_rels, ({ one }) => ({
@@ -5240,6 +5299,21 @@ export const relations_header_rels = relations(header_rels, ({ one }) => ({
     fields: [header_rels.parent],
     references: [header.id],
     relationName: "_rels",
+  }),
+  pagesID: one(pages, {
+    fields: [header_rels.pagesID],
+    references: [pages.id],
+    relationName: "pages",
+  }),
+  coursesID: one(courses, {
+    fields: [header_rels.coursesID],
+    references: [courses.id],
+    relationName: "courses",
+  }),
+  lessonsID: one(lessons, {
+    fields: [header_rels.lessonsID],
+    references: [lessons.id],
+    relationName: "lessons",
   }),
   adminsID: one(admins, {
     fields: [header_rels.adminsID],
@@ -5276,11 +5350,6 @@ export const relations__header_v_version_nav_items = relations(
     _locales: many(_header_v_version_nav_items_locales, {
       relationName: "_locales",
     }),
-    link_page: one(pages, {
-      fields: [_header_v_version_nav_items.link_page],
-      references: [pages.id],
-      relationName: "link_page",
-    }),
   }),
 );
 export const relations__header_v_rels = relations(
@@ -5290,6 +5359,21 @@ export const relations__header_v_rels = relations(
       fields: [_header_v_rels.parent],
       references: [_header_v.id],
       relationName: "_rels",
+    }),
+    pagesID: one(pages, {
+      fields: [_header_v_rels.pagesID],
+      references: [pages.id],
+      relationName: "pages",
+    }),
+    coursesID: one(courses, {
+      fields: [_header_v_rels.coursesID],
+      references: [courses.id],
+      relationName: "courses",
+    }),
+    lessonsID: one(lessons, {
+      fields: [_header_v_rels.lessonsID],
+      references: [lessons.id],
+      relationName: "lessons",
     }),
     adminsID: one(admins, {
       fields: [_header_v_rels.adminsID],
@@ -5327,11 +5411,6 @@ export const relations_footer_nav_items = relations(
     _locales: many(footer_nav_items_locales, {
       relationName: "_locales",
     }),
-    link_page: one(pages, {
-      fields: [footer_nav_items.link_page],
-      references: [pages.id],
-      relationName: "link_page",
-    }),
   }),
 );
 export const relations_footer_locales = relations(
@@ -5349,6 +5428,21 @@ export const relations_footer_rels = relations(footer_rels, ({ one }) => ({
     fields: [footer_rels.parent],
     references: [footer.id],
     relationName: "_rels",
+  }),
+  pagesID: one(pages, {
+    fields: [footer_rels.pagesID],
+    references: [pages.id],
+    relationName: "pages",
+  }),
+  coursesID: one(courses, {
+    fields: [footer_rels.coursesID],
+    references: [courses.id],
+    relationName: "courses",
+  }),
+  lessonsID: one(lessons, {
+    fields: [footer_rels.lessonsID],
+    references: [lessons.id],
+    relationName: "lessons",
   }),
   adminsID: one(admins, {
     fields: [footer_rels.adminsID],
@@ -5388,11 +5482,6 @@ export const relations__footer_v_version_nav_items = relations(
     _locales: many(_footer_v_version_nav_items_locales, {
       relationName: "_locales",
     }),
-    link_page: one(pages, {
-      fields: [_footer_v_version_nav_items.link_page],
-      references: [pages.id],
-      relationName: "link_page",
-    }),
   }),
 );
 export const relations__footer_v_locales = relations(
@@ -5412,6 +5501,21 @@ export const relations__footer_v_rels = relations(
       fields: [_footer_v_rels.parent],
       references: [_footer_v.id],
       relationName: "_rels",
+    }),
+    pagesID: one(pages, {
+      fields: [_footer_v_rels.pagesID],
+      references: [pages.id],
+      relationName: "pages",
+    }),
+    coursesID: one(courses, {
+      fields: [_footer_v_rels.coursesID],
+      references: [courses.id],
+      relationName: "courses",
+    }),
+    lessonsID: one(lessons, {
+      fields: [_footer_v_rels.lessonsID],
+      references: [lessons.id],
+      relationName: "lessons",
     }),
     adminsID: one(admins, {
       fields: [_footer_v_rels.adminsID],

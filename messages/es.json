@@ -79,5 +79,26 @@
     "title": "Página no encontrada",
     "description": "La página que buscas no existe o se ha movido.",
     "home": "Ir al inicio"
+  },
+  "content": {
+    "tableOfContents": "En esta página",
+    "copyCode": "Copiar código",
+    "copied": "Copiado",
+    "image": "Imagen",
+    "enlargeImage": "Ampliar imagen",
+    "enlargeImageNamed": "Ampliar imagen: {alt}",
+    "videoUnsupported": "Tu navegador no puede reproducir este vídeo.",
+    "plotCurve": "y = {expression}{label, select, empty {} other { ({label})}}",
+    "plotPoint": "Punto en ({x}, {y}){label, select, empty {} other {: {label}}}",
+    "callout": {
+      "info": "Nota",
+      "tip": "Consejo",
+      "warning": "Atención",
+      "danger": "Peligro"
+    },
+    "funnel": {
+      "ofPrevious": "{rate} del paso anterior",
+      "overall": "Conversión total: {rate}"
+    }
   }
 }

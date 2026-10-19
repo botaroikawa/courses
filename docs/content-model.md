@@ -35,8 +35,8 @@ A lesson's `course` mirrors the syllabus of the course **as last published** (th
 
 - `course` is read-only and derived (see above). A lesson in no module has no URL; the admin list shows its course as empty.
 - A lesson appears once, in one module of one course. Its slug is unique within that course, not site-wide, so it is a text field generated from the title: Payload's native slug field enforces site-wide uniqueness. The lesson's slug field and the course's publish check both enforce it.
-- `content` is the shared Lexical editor ([editor.md](editor.md)); today the default editor.
-- `readingTime` (minutes, per locale) is computed on every save from the locale's words at 200 per minute (`src/lib/reading-time.ts`), rounded up. Video blocks will add their duration when the Video block exists ([editor.md](editor.md)). Images and components add nothing. No manual override.
+- `content` is the shared Lexical editor ([editor.md](editor.md)).
+- `readingTime` (minutes, per locale) is computed on every save from the locale's words at 200 per minute (`src/lib/reading-time.ts`), rounded up, plus the `duration` of each Video block ([editor.md](editor.md)). Images and other blocks add nothing. No manual override.
 - `firstPublishedAt` is set when the lesson is first published in a locale and never moves; it drives the "New" badge.
 - `freePreview` makes the lesson public and indexable; every other lesson is `noindex`.
 - Through the API, visitors only get published free previews (`freePreviewOrStaff`). Students authenticate with Better Auth, never with Payload, so the site reads other lessons on the server after checking the session.
@@ -71,5 +71,6 @@ Deleting is a conscious act; the admin descriptions say that unpublishing is the
 - **Lesson**: removed from every syllabus, course versions included (the database cascades the relationship rows). Its progress and quiz attempts go with it once those exist.
 - **Course**: its lessons stay, without a course, ready to be added to another one (the database sets their `course` to null). Its enrollments go with it once those exist.
 - **Category**: its courses keep a null category and cannot be published again until they get a new one.
+- **Any link target** (page, course, lesson): links to it in rich text keep the id and render as plain text; header and footer items lose their target and disappear until edited ([editor.md](editor.md)).
 
 Open detail: which locale defines "every published lesson" when setting `completedAt`. Proposed: the locale the student is using when they complete the last lesson.

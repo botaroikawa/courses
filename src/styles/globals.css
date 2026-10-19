@@ -185,3 +185,18 @@
     }
   }
 }
+/* Code blocks: Shiki renders both themes; the dark one applies under `.dark` */
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}
+
+/* Function plots (Mafs) follow the site theme. `html` outranks mafs/core.css, which loads later */
+html .MafsView {
+  --mafs-bg: var(--background);
+  --mafs-fg: var(--foreground);
+  --mafs-line-color: var(--border);
+  --mafs-origin-color: var(--muted-foreground);
+  --grid-line-subdivision-color: color-mix(in oklch, var(--border), transparent 50%);
+}

@@ -6,6 +6,7 @@ import { getPayload } from 'payload'
 import { cache } from 'react'
 
 import { type Locale, locales } from '@/i18n/routing'
+import { hrefsFor, type LinkHrefs, type LinkRef } from '@/lib/links'
 import type { Brand, Footer, Header, Media, Page } from '@/payload-types'
 
 export const getPayloadClient = cache(() => getPayload({ config }))
@@ -59,6 +60,71 @@ export const getSiteGlobals = cache(async (locale: Locale) => {
   ])
   return { header, footer, brand } satisfies { header: Header; footer: Footer; brand: Brand }
 })
+
+// Hrefs for internal links. Read with overrideAccess because the targets' slugs are public even
+// where their content is not (a lesson behind sign-in), and limited to what is published in
+// `locale`, or to drafts too while staff preview.
+export async function getLinkHrefs(refs: LinkRef[], locale: Locale): Promise<LinkHrefs> {
+  if (!refs.length) return new Map()
+  const payload = await getPayloadClient()
+  const { draft } = await getViewer()
+  const idsOf = (collection: LinkRef['relationTo']) =>
+    refs.filter((ref) => ref.relationTo === collection).map((ref) => ref.id)
+  const query = (ids: string[]) => ({
+    where: {
+      id: { in: ids },
+      ...(draft ? {} : { _status: { equals: 'published' as const } }),
+    },
+    locale,
+    draft,
+    depth: 0,
+    pagination: false as const,
+    overrideAccess: true,
+  })
+
+  const [pages, lessons] = await Promise.all([
+    idsOf('pages').length
+      ? payload.find({ collection: 'pages', select: { slug: true }, ...query(idsOf('pages')) })
+      : null,
+    idsOf('lessons').length
+      ? payload.find({
+          collection: 'lessons',
+          select: { slug: true, course: true },
+          ...query(idsOf('lessons')),
+        })
+      : null,
+  ])
+  // A lesson's href needs its course's slug, and its course must be reachable too
+  const courseIds = [
+    ...new Set([
+      ...idsOf('courses'),
+      ...(lessons?.docs ?? []).flatMap((lesson) => (lesson.course ? [String(lesson.course)] : [])),
+    ]),
+  ]
+  const courses = courseIds.length
+    ? await payload.find({ collection: 'courses', select: { slug: true }, ...query(courseIds) })
+    : null
+  return hrefsFor({
+    pages: pages?.docs ?? [],
+    courses: courses?.docs ?? [],
+    lessons: lessons?.docs ?? [],
+  })
+}
+
+// Media documents by id, with the viewer's access: private files stay out for visitors
+export async function getMediaByIds(ids: string[]): Promise<Media[]> {
+  if (!ids.length) return []
+  const payload = await getPayloadClient()
+  const { user } = await getViewer()
+  const { docs } = await payload.find({
+    collection: 'media',
+    where: { id: { in: ids } },
+    depth: 0,
+    pagination: false,
+    user,
+  })
+  return docs
+}
 
 export function mediaOf(value: string | Media | null | undefined): Media | null {
   return value && typeof value === 'object' ? value : null

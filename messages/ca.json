@@ -79,5 +79,26 @@
     "title": "No s'ha trobat la pàgina",
     "description": "La pàgina que busques no existeix o s'ha mogut.",
     "home": "Ves a l'inici"
+  },
+  "content": {
+    "tableOfContents": "En aquesta pàgina",
+    "copyCode": "Copia el codi",
+    "copied": "Copiat",
+    "image": "Imatge",
+    "enlargeImage": "Amplia la imatge",
+    "enlargeImageNamed": "Amplia la imatge: {alt}",
+    "videoUnsupported": "El teu navegador no pot reproduir aquest vídeo.",
+    "plotCurve": "y = {expression}{label, select, empty {} other { ({label})}}",
+    "plotPoint": "Punt a ({x}, {y}){label, select, empty {} other {: {label}}}",
+    "callout": {
+      "info": "Nota",
+      "tip": "Consell",
+      "warning": "Atenció",
+      "danger": "Perill"
+    },
+    "funnel": {
+      "ofPrevious": "{rate} del pas anterior",
+      "overall": "Conversió total: {rate}"
+    }
   }
 }
