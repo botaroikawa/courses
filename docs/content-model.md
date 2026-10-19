@@ -21,7 +21,7 @@ Content collections sit in the "Courses" admin group; student data in "Students"
 - `enrollmentCount` is stored so the "most popular" sort never counts rows on every catalogue load. Requests cannot write it (field access); enroll and leave will keep it current. Course versions hold a copy of it, so it must be written like a lesson's `course` (below), straight to the row and every version, or publishing a draft brings back an old count.
 - `firstPublishedAt` (per locale) drives the "newest" sort, so a course drafted for months still counts as new when it comes out.
 - Lesson count and total duration are computed from lessons published in the requested locale, at read time: they differ per locale.
-- Same editing setup as `pages`: shared English slug, SEO tab, drafts with autosave, scheduled publish. Live preview arrives with the course pages.
+- Same editing setup as `pages`: shared English slug, SEO tab, drafts with autosave, scheduled publish, preview and live preview.
 
 ### Syllabus and membership
 
@@ -29,7 +29,7 @@ A lesson's `course` mirrors the syllabus of the course **as last published** (th
 
 - The syllabus picker only offers lessons without a course or already in this one.
 - Publishing a course checks that each lesson appears once, belongs to no other course, and that slugs are unique among its lessons. To move a lesson, remove it from the first course and publish that course first.
-- The site builds a syllabus from the course's modules and skips any lesson whose `course` is not that course.
+- The site builds a syllabus from the course's modules and skips any lesson whose `course` is not that course ([site.md](site.md#reading-content)).
 
 ## lessons
 
@@ -38,7 +38,7 @@ A lesson's `course` mirrors the syllabus of the course **as last published** (th
 - `content` is the shared Lexical editor ([editor.md](editor.md)).
 - `readingTime` (minutes, per locale) is computed on every save from the locale's words at 200 per minute (`src/lib/reading-time.ts`), rounded up, plus the `duration` of each Video block ([editor.md](editor.md)). Images and other blocks add nothing. No manual override.
 - `firstPublishedAt` is set when the lesson is first published in a locale and never moves; it drives the "New" badge.
-- `freePreview` makes the lesson public and indexable; every other lesson is `noindex`.
+- `freePreview` makes the lesson public and indexable; every other lesson is `noindex`. Who reads a lesson is decided in `canReadLesson` ([site.md](site.md#lesson-access)).
 - Through the API, visitors only get published free previews (`freePreviewOrStaff`). Students authenticate with Better Auth, never with Payload, so the site reads other lessons on the server after checking the session.
 - `quiz` (not built): questions of type single choice, multiple choice or true/false; each option has an optional explanation shown after answering.
 

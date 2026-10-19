@@ -2,20 +2,8 @@ import type { CollectionConfig } from 'payload'
 
 import { isStaff, publishedOrStaff } from '@/access'
 import { contentEditor } from '@/editor'
-import { isLocale } from '@/i18n/routing'
-import { pagePath } from '@/lib/paths'
-
-const previewUrl = ({
-  data,
-  locale,
-}: {
-  data: Record<string, unknown>
-  locale: { code: string }
-}) => {
-  if (typeof data.slug !== 'string' || !isLocale(locale.code)) return null
-  const path = pagePath(data.slug, locale.code)
-  return `${process.env.NEXT_PUBLIC_SITE_URL}/api/preview?path=${encodeURIComponent(path)}`
-}
+import { reservedSlugs } from '@/lib/paths'
+import { pagePreview } from '@/lib/preview'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -23,8 +11,8 @@ export const Pages: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', '_status', 'updatedAt'],
     group: 'Content',
-    livePreview: { url: previewUrl },
-    preview: (data, { locale }) => previewUrl({ data, locale: { code: locale } }),
+    livePreview: { url: ({ data, locale }) => pagePreview(data, locale.code) },
+    preview: (doc, { locale }) => pagePreview(doc, locale),
   },
   access: {
     read: publishedOrStaff,
@@ -43,7 +31,16 @@ export const Pages: CollectionConfig = {
     { name: 'title', type: 'text', required: true, localized: true },
     // Shared by every locale and written in English: URLs are English everywhere.
     // `home` is rendered at the site root.
-    { name: 'slug', type: 'slug', useAsSlug: 'title' },
+    {
+      name: 'slug',
+      type: 'slug',
+      useAsSlug: 'title',
+      // The app owns these first segments (/courses, /account…): a page there would never show
+      validate: (value: string | null | undefined) =>
+        value && reservedSlugs.includes(value.split('/')[0] ?? '')
+          ? `"${value}" is taken by the site itself. Choose another slug.`
+          : true,
+    },
     { name: 'content', type: 'richText', localized: true, editor: contentEditor },
   ],
 }

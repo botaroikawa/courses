@@ -12,7 +12,7 @@ import type { Brand, Footer, Header, Media, Page } from '@/payload-types'
 export const getPayloadClient = cache(() => getPayload({ config }))
 
 // In draft mode the signed-in admin's permissions apply, so drafts become visible
-const getViewer = cache(async () => {
+export const getViewer = cache(async () => {
   const { isEnabled } = await draftMode()
   if (!isEnabled) return { draft: false, user: null }
   const payload = await getPayloadClient()
@@ -35,21 +35,24 @@ export const getPage = cache(async (slug: string, locale: Locale): Promise<Page 
   return docs[0] ?? null
 })
 
-// Locales in which a page is published, used for hreflang alternates and the sitemap
-export const getPublishedLocales = cache(async (slug: string): Promise<Locale[]> => {
-  const payload = await getPayloadClient()
-  const published = await Promise.all(
-    locales.map(async (locale) => {
-      const { totalDocs } = await payload.count({
-        collection: 'pages',
-        locale,
-        where: { slug: { equals: slug }, _status: { equals: 'published' } },
-      })
-      return totalDocs > 0 ? locale : null
-    }),
-  )
-  return published.filter((locale) => locale !== null)
-})
+// Locales in which a document is published, used for hreflang alternates. `_status` is per locale.
+export const getPublishedLocales = cache(
+  async (collection: 'pages' | 'courses' | 'lessons', id: string): Promise<Locale[]> => {
+    const payload = await getPayloadClient()
+    const published = await Promise.all(
+      locales.map(async (locale) => {
+        const { totalDocs } = await payload.count({
+          collection,
+          locale,
+          where: { id: { equals: id }, _status: { equals: 'published' } },
+          overrideAccess: true,
+        })
+        return totalDocs > 0 ? locale : null
+      }),
+    )
+    return published.filter((locale) => locale !== null)
+  },
+)
 
 export const getSiteGlobals = cache(async (locale: Locale) => {
   const payload = await getPayloadClient()

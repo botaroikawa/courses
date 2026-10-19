@@ -100,5 +100,64 @@
       "ofPrevious": "{rate} of the previous step",
       "overall": "Overall conversion: {rate}"
     }
+  },
+  "catalogue": {
+    "title": "Courses",
+    "description": "Free courses to learn at your own pace.",
+    "sortLabel": "Sort by",
+    "sort": {
+      "newest": "Newest",
+      "popular": "Most popular",
+      "duration": "Shortest",
+      "title": "A–Z"
+    },
+    "category": "Category",
+    "allCategories": "All categories",
+    "level": "Level",
+    "allLevels": "All levels",
+    "duration": "Duration",
+    "anyDuration": "Any duration",
+    "durations": {
+      "short": "Under 1 hour",
+      "medium": "1 to 3 hours",
+      "long": "Over 3 hours"
+    },
+    "results": "{count, plural, =0 {No courses} one {# course} other {# courses}}",
+    "emptyTitle": "No courses match these filters",
+    "emptyDescription": "Try other filters or clear them.",
+    "clearFilters": "Clear filters",
+    "noCourses": "There are no courses in this language yet."
+  },
+  "course": {
+    "levels": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "lessons": "{count, plural, one {# lesson} other {# lessons}}",
+    "featured": "Featured",
+    "start": "Start course",
+    "syllabus": "Syllabus",
+    "outcomes": "What you'll learn",
+    "requirements": "Requirements",
+    "instructors": "Taught by",
+    "preview": "Preview",
+    "new": "New",
+    "locked": "Requires an account",
+    "noLessons": "This course has no lessons in this language yet."
+  },
+  "lesson": {
+    "previous": "Previous",
+    "next": "Next",
+    "position": "Lesson {position} of {total}",
+    "lockedTitle": "Sign in to read this lesson",
+    "lockedDescription": "It's free: with an account you can read every lesson and keep track of your progress.",
+    "signUp": "Create a free account",
+    "signIn": "Sign in",
+    "courseOutline": "Course outline"
+  },
+  "instructor": {
+    "courses": "Courses",
+    "links": "Links"
   }
 }

@@ -100,5 +100,64 @@
       "ofPrevious": "{rate} del paso anterior",
       "overall": "Conversión total: {rate}"
     }
+  },
+  "catalogue": {
+    "title": "Cursos",
+    "description": "Cursos gratuitos para aprender a tu ritmo.",
+    "sortLabel": "Ordenar por",
+    "sort": {
+      "newest": "Más recientes",
+      "popular": "Más populares",
+      "duration": "Más cortos",
+      "title": "A–Z"
+    },
+    "category": "Categoría",
+    "allCategories": "Todas las categorías",
+    "level": "Nivel",
+    "allLevels": "Todos los niveles",
+    "duration": "Duración",
+    "anyDuration": "Cualquier duración",
+    "durations": {
+      "short": "Menos de 1 hora",
+      "medium": "De 1 a 3 horas",
+      "long": "Más de 3 horas"
+    },
+    "results": "{count, plural, =0 {Ningún curso} one {# curso} other {# cursos}}",
+    "emptyTitle": "Ningún curso coincide con estos filtros",
+    "emptyDescription": "Prueba con otros filtros o quítalos.",
+    "clearFilters": "Quitar filtros",
+    "noCourses": "Aún no hay cursos en este idioma."
+  },
+  "course": {
+    "levels": {
+      "beginner": "Principiante",
+      "intermediate": "Intermedio",
+      "advanced": "Avanzado"
+    },
+    "lessons": "{count, plural, one {# lección} other {# lecciones}}",
+    "featured": "Destacado",
+    "start": "Empezar el curso",
+    "syllabus": "Temario",
+    "outcomes": "Lo que aprenderás",
+    "requirements": "Requisitos",
+    "instructors": "Impartido por",
+    "preview": "Vista previa",
+    "new": "Nuevo",
+    "locked": "Requiere una cuenta",
+    "noLessons": "Este curso aún no tiene lecciones en este idioma."
+  },
+  "lesson": {
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "position": "Lección {position} de {total}",
+    "lockedTitle": "Inicia sesión para leer esta lección",
+    "lockedDescription": "Es gratis: con una cuenta puedes leer todas las lecciones y guardar tu progreso.",
+    "signUp": "Crear una cuenta gratis",
+    "signIn": "Iniciar sesión",
+    "courseOutline": "Índice del curso"
+  },
+  "instructor": {
+    "courses": "Cursos",
+    "links": "Enlaces"
   }
 }

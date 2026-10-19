@@ -5,7 +5,7 @@ import { LoginForm } from '@/components/auth/login-form'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type { Locale } from '@/i18n/routing'
 import { enabledSocialProviders } from '@/lib/auth'
-import { safeRedirect } from '@/lib/redirects'
+import { safeRedirect, stripLocale } from '@/lib/redirects'
 
 type Props = {
   params: Promise<{ locale: string }>
@@ -38,9 +38,4 @@ export default async function LoginPage({ params, searchParams }: Props) {
       </CardContent>
     </Card>
   )
-}
-
-// The proxy passes the full localized path; navigation helpers expect it without the prefix
-function stripLocale(path: string, locale: Locale) {
-  return path === `/${locale}` ? '/' : path.replace(new RegExp(`^/${locale}(?=/)`), '')
 }

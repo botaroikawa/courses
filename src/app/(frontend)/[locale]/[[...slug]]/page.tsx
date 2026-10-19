@@ -8,7 +8,7 @@ import { RichText } from '@/components/rich-text'
 import { LivePreviewListener } from '@/components/site/live-preview-listener'
 import { routing } from '@/i18n/routing'
 import { getPage, getPublishedLocales, mediaOf } from '@/lib/content'
-import { HOME_SLUG } from '@/lib/paths'
+import { HOME_SLUG, pageHref } from '@/lib/paths'
 import { alternatesFor } from '@/lib/seo'
 
 type Props = {
@@ -26,16 +26,14 @@ async function resolve(params: Props['params']) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, pageSlug } = await resolve(params)
-  const [page, publishedLocales] = await Promise.all([
-    getPage(pageSlug, locale),
-    getPublishedLocales(pageSlug),
-  ])
+  const page = await getPage(pageSlug, locale)
   if (!page) return {}
+  const publishedLocales = await getPublishedLocales('pages', page.id)
   const image = mediaOf(page.meta?.image)
   return {
     title: pageSlug === HOME_SLUG ? undefined : page.meta?.title || page.title,
     description: page.meta?.description ?? undefined,
-    alternates: alternatesFor(pageSlug, locale, publishedLocales),
+    alternates: alternatesFor(pageHref(pageSlug), locale, publishedLocales),
     openGraph: image?.url
       ? { images: [{ url: image.url, alt: image.alt ?? undefined }] }
       : undefined,

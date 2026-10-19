@@ -20,7 +20,14 @@ import { authClient } from '@/lib/auth-client'
 import { SocialButtons, type SocialProvider } from './social-buttons'
 import { useLocalizedPath } from './use-localized-path'
 
-export function RegisterForm({ providers }: { providers: SocialProvider[] }) {
+export function RegisterForm({
+  providers,
+  redirectTo,
+}: {
+  providers: SocialProvider[]
+  // Where the email confirmation or social sign-up lands, locale-less
+  redirectTo: string
+}) {
   const t = useTranslations('register')
   const tc = useTranslations('common')
   const locale = useLocale()
@@ -41,7 +48,7 @@ export function RegisterForm({ providers }: { providers: SocialProvider[] }) {
       email,
       password,
       locale,
-      callbackURL: localized('/account'),
+      callbackURL: localized(redirectTo),
     })
     if (error) {
       setError(error.message ?? tc('genericError'))
@@ -53,7 +60,7 @@ export function RegisterForm({ providers }: { providers: SocialProvider[] }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <SocialButtons providers={providers} callbackURL={localized('/account')} />
+      <SocialButtons providers={providers} callbackURL={localized(redirectTo)} />
       {providers.length > 0 && <FieldSeparator>{tc('or')}</FieldSeparator>}
       <form onSubmit={submit}>
         <FieldGroup>
@@ -106,7 +113,10 @@ export function RegisterForm({ providers }: { providers: SocialProvider[] }) {
       </form>
       <p className="text-center text-muted-foreground text-sm">
         {t('haveAccount')}{' '}
-        <Link href="/login" className="text-foreground underline">
+        <Link
+          href={{ pathname: '/login', query: { redirect: localized(redirectTo) } }}
+          className="text-foreground underline"
+        >
           {t('signIn')}
         </Link>
       </p>

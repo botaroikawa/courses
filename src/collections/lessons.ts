@@ -6,6 +6,7 @@ import { contentEditor } from '@/editor'
 import { firstPublishedAtField } from '@/fields/first-published-at'
 import { validateLessonSlug } from '@/lib/course-lessons'
 import { relationId } from '@/lib/courses'
+import { lessonPreview } from '@/lib/preview'
 import { countWords, readingMinutes } from '@/lib/reading-time'
 import { blockFieldsOf } from '@/lib/rich-text'
 import type { Lesson, VideoBlock } from '@/payload-types'
@@ -43,6 +44,8 @@ export const Lessons: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'course', 'freePreview', '_status', 'updatedAt'],
     group: 'Courses',
+    livePreview: { url: ({ data, locale, req }) => lessonPreview(data, locale.code, req) },
+    preview: (doc, { locale, req }) => lessonPreview(doc, locale, req),
     description:
       'Add a lesson to a course from the course syllabus. To retire a lesson without losing student progress, unpublish it instead of deleting it.',
   },

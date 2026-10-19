@@ -12,6 +12,7 @@ One `media` collection and one bucket hold every file: images, videos, subtitles
   - `private`: staff only, for example material for a course that is not out yet. Sent with `private, no-store`, so a shared cache never keeps a copy fetched by staff.
 - The `Cache-Control` header is set by an upload handler that runs before the storage adapter streams the file; any response built without it falls back to `private, no-store`. Switching a file from public to private takes up to a day to leave caches that already hold it.
 - Lessons and pages store a file's id, never its URL, so changing how files are served touches no content.
+- Lesson content is read on the server past access control ([site.md](site.md#reading-content)), so the rich-text renderer drops private images and videos unless staff are previewing.
 - URLs are absolute (`NEXT_PUBLIC_SITE_URL` + `/api/media/file/…`); `next.config.ts` allows exactly that path for `next/image`. The image optimizer fetches without a session, so it only sees public files.
 - Objects live at `[prefix/]<_objectKey>/<filename>`, where `_objectKey` is a hidden per-upload folder assigned by the storage plugin (`storageKey` in `src/lib/media.ts`).
 

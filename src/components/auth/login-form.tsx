@@ -120,7 +120,10 @@ export function LoginForm({
       </form>
       <p className="text-center text-muted-foreground text-sm">
         {t('noAccount')}{' '}
-        <Link href="/register" className="text-foreground underline">
+        <Link
+          href={{ pathname: '/register', query: { redirect: localized(redirectTo) } }}
+          className="text-foreground underline"
+        >
           {t('register')}
         </Link>
       </p>

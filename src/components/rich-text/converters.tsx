@@ -49,10 +49,17 @@ const block =
 export function buildConverters({
   hrefs,
   anchors,
+  showPrivate,
 }: {
   hrefs: LinkHrefs
   anchors: WeakMap<object, string>
+  // Lesson content is read with overrideAccess, so private files arrive populated; only staff
+  // previewing may see them (docs/media.md)
+  showPrivate: boolean
 }): JSXConverters {
+  const visible = (media: Media | null): media is Media =>
+    Boolean(media?.url) && (showPrivate || media?.visibility === 'public')
+
   const children = ({ node, nodesToJSX }: Args) => nodesToJSX({ nodes: node.children ?? [] })
 
   return {
@@ -183,7 +190,7 @@ export function buildConverters({
     },
     upload: ({ node }: { node: { value: unknown; fields?: { caption?: string | null } } }) => {
       const media = node.value && typeof node.value === 'object' ? (node.value as Media) : null
-      if (!media?.url) return null
+      if (!visible(media) || !media.url) return null
       if (!media.mimeType?.startsWith('image/')) {
         return (
           <p className={flow}>
@@ -207,7 +214,9 @@ export function buildConverters({
           {nodesToJSX({ nodes: fields.content?.root?.children ?? [] })}
         </Callout>
       )),
-      video: block<VideoFields>((fields) => <Video {...fields} />),
+      video: block<VideoFields>((fields) =>
+        typeof fields.video === 'object' && !visible(fields.video) ? null : <Video {...fields} />,
+      ),
       chart: block<ChartFields>((fields) => <Chart {...fields} />),
       functionPlot: block<FunctionPlotFields>((fields) => <FunctionPlot {...fields} />),
       funnel: block<FunnelFields>((fields) => <Funnel {...fields} />),

@@ -4,6 +4,7 @@ import { isStaff, never, publishedOrStaff } from '@/access'
 import { firstPublishedAtField } from '@/fields/first-published-at'
 import { syncLessonCourse, validateModules } from '@/lib/course-lessons'
 import { courseLevels } from '@/lib/courses'
+import { coursePreview } from '@/lib/preview'
 import type { Course } from '@/payload-types'
 
 const syncLessons: CollectionAfterChangeHook<Course> = async ({ doc, req }) => {
@@ -26,6 +27,8 @@ export const Courses: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'level', '_status', 'updatedAt'],
     group: 'Courses',
+    livePreview: { url: ({ data, locale }) => coursePreview(data, locale.code) },
+    preview: (doc, { locale }) => coursePreview(doc, locale),
     description:
       'To retire a course without losing enrollments, unpublish it instead of deleting it. Deleting a course leaves its lessons without a course.',
   },

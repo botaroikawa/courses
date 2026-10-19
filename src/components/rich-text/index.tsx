@@ -3,7 +3,7 @@ import { cn } from 'cn'
 import { getLocale } from 'next-intl/server'
 
 import type { Locale } from '@/i18n/routing'
-import { getLinkHrefs } from '@/lib/content'
+import { getLinkHrefs, getViewer } from '@/lib/content'
 import { linkRefsIn } from '@/lib/links'
 import { headingAnchors } from '@/lib/rich-text'
 
@@ -21,14 +21,17 @@ export async function RichText({
 }) {
   if (!data) return null
   const locale = (await getLocale()) as Locale
-  const hrefs = await getLinkHrefs(linkRefsIn(data), locale)
+  const [hrefs, { draft }] = await Promise.all([
+    getLinkHrefs(linkRefsIn(data), locale),
+    getViewer(),
+  ])
   const anchors = new WeakMap<object, string>(
     headingAnchors(data).map(({ node, id }) => [node, id]),
   )
   return (
     <LexicalRichText
       data={data}
-      converters={buildConverters({ hrefs, anchors })}
+      converters={buildConverters({ hrefs, anchors, showPrivate: draft })}
       disableIndent
       disableTextAlign
       className={cn('text-base', className)}

@@ -5,16 +5,22 @@ import { RegisterForm } from '@/components/auth/register-form'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type { Locale } from '@/i18n/routing'
 import { enabledSocialProviders } from '@/lib/auth'
+import { safeRedirect, stripLocale } from '@/lib/redirects'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('register')
   return { title: t('title'), robots: { index: false } }
 }
 
-export default async function RegisterPage({ params }: { params: Promise<{ locale: string }> }) {
+type Props = {
+  params: Promise<{ locale: string }>
+  searchParams: Promise<{ redirect?: string }>
+}
+
+export default async function RegisterPage({ params, searchParams }: Props) {
   const locale = (await params).locale as Locale
   setRequestLocale(locale)
-  const t = await getTranslations('register')
+  const [t, { redirect }] = await Promise.all([getTranslations('register'), searchParams])
 
   return (
     <Card>
@@ -25,7 +31,10 @@ export default async function RegisterPage({ params }: { params: Promise<{ local
         <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <RegisterForm providers={enabledSocialProviders} />
+        <RegisterForm
+          providers={enabledSocialProviders}
+          redirectTo={stripLocale(safeRedirect(redirect), locale)}
+        />
       </CardContent>
     </Card>
   )

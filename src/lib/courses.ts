@@ -3,6 +3,8 @@ export const courseLevels = [
   { label: 'Intermediate', value: 'intermediate' },
   { label: 'Advanced', value: 'advanced' },
 ] as const
+export type CourseLevel = (typeof courseLevels)[number]['value']
+export const courseLevelValues = courseLevels.map((level) => level.value)
 
 type RelationValue = string | { id: string } | null | undefined
 

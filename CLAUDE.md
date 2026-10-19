@@ -14,6 +14,7 @@ Read the doc before changing its area:
 - `docs/content-model.md`: collections, relationships, invariants, localization strategy, student data, deletions.
 - `docs/editor.md`: the shared Lexical editor and its blocks, internal links, table of contents, reading time, checklist for adding a block.
 - `docs/media.md`: files, visibility, video, paid-access plan.
+- `docs/site.md`: public routes, how the site reads courses and lessons, lesson access, catalogue, SEO, preview.
 
 Update the doc in the same change as the code. When a product change contradicts a doc, rewrite the doc to the new truth and follow every seam it lists, so nothing is left half-migrated. A new area gets its own doc and a line here.
 

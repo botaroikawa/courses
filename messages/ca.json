@@ -100,5 +100,64 @@
       "ofPrevious": "{rate} del pas anterior",
       "overall": "Conversió total: {rate}"
     }
+  },
+  "catalogue": {
+    "title": "Cursos",
+    "description": "Cursos gratuïts per aprendre al teu ritme.",
+    "sortLabel": "Ordena per",
+    "sort": {
+      "newest": "Més recents",
+      "popular": "Més populars",
+      "duration": "Més curts",
+      "title": "A–Z"
+    },
+    "category": "Categoria",
+    "allCategories": "Totes les categories",
+    "level": "Nivell",
+    "allLevels": "Tots els nivells",
+    "duration": "Durada",
+    "anyDuration": "Qualsevol durada",
+    "durations": {
+      "short": "Menys d'1 hora",
+      "medium": "D'1 a 3 hores",
+      "long": "Més de 3 hores"
+    },
+    "results": "{count, plural, =0 {Cap curs} one {# curs} other {# cursos}}",
+    "emptyTitle": "Cap curs coincideix amb aquests filtres",
+    "emptyDescription": "Prova amb altres filtres o treu-los.",
+    "clearFilters": "Treu els filtres",
+    "noCourses": "Encara no hi ha cursos en aquest idioma."
+  },
+  "course": {
+    "levels": {
+      "beginner": "Principiant",
+      "intermediate": "Intermedi",
+      "advanced": "Avançat"
+    },
+    "lessons": "{count, plural, one {# lliçó} other {# lliçons}}",
+    "featured": "Destacat",
+    "start": "Comença el curs",
+    "syllabus": "Temari",
+    "outcomes": "Què aprendràs",
+    "requirements": "Requisits",
+    "instructors": "Impartit per",
+    "preview": "Vista prèvia",
+    "new": "Nou",
+    "locked": "Cal un compte",
+    "noLessons": "Aquest curs encara no té lliçons en aquest idioma."
+  },
+  "lesson": {
+    "previous": "Anterior",
+    "next": "Següent",
+    "position": "Lliçó {position} de {total}",
+    "lockedTitle": "Inicia la sessió per llegir aquesta lliçó",
+    "lockedDescription": "És gratuït: amb un compte pots llegir totes les lliçons i desar el teu progrés.",
+    "signUp": "Crea un compte gratuït",
+    "signIn": "Inicia la sessió",
+    "courseOutline": "Índex del curs"
+  },
+  "instructor": {
+    "courses": "Cursos",
+    "links": "Enllaços"
   }
 }
