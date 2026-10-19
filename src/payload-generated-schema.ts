@@ -37,6 +37,22 @@ export const enum__pages_v_version_status = pgEnum(
   "enum__pages_v_version_status",
   ["draft", "published"],
 );
+export const enum_media_subtitles_locale = pgEnum(
+  "enum_media_subtitles_locale",
+  ["en", "es", "ca"],
+);
+export const enum_media_visibility = pgEnum("enum_media_visibility", [
+  "public",
+  "private",
+]);
+export const enum__media_v_version_subtitles_locale = pgEnum(
+  "enum__media_v_version_subtitles_locale",
+  ["en", "es", "ca"],
+);
+export const enum__media_v_version_visibility = pgEnum(
+  "enum__media_v_version_visibility",
+  ["public", "private"],
+);
 export const enum_admins_role = pgEnum("enum_admins_role", ["admin", "editor"]);
 export const enum__admins_v_version_role = pgEnum(
   "enum__admins_v_version_role",
@@ -308,10 +324,35 @@ export const _pages_v_rels = pgTable(
   ],
 );
 
+export const media_subtitles = pgTable(
+  "media_subtitles",
+  {
+    _order: integer("_order").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+    id: varchar("id").primaryKey(),
+    locale: enum_media_subtitles_locale("locale"),
+    file: uuid("file_id").references(() => media.id, {
+      onDelete: "set null",
+    }),
+  },
+  (columns) => [
+    index("media_subtitles_order_idx").on(columns._order),
+    index("media_subtitles_parent_id_idx").on(columns._parentID),
+    index("media_subtitles_file_idx").on(columns.file),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [media.id],
+      name: "media_subtitles_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
 export const media = pgTable(
   "media",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    visibility: enum_media_visibility("visibility").notNull().default("public"),
+    duration: numeric("duration", { mode: "number" }),
     _h_folders: uuid("_h_folders_id").references(() => folders.id, {
       onDelete: "set null",
     }),
@@ -404,7 +445,7 @@ export const media = pgTable(
 export const media_locales = pgTable(
   "media_locales",
   {
-    alt: varchar("alt").notNull(),
+    alt: varchar("alt"),
     id: serial("id").primaryKey(),
     _locale: enum__locales("_locale").notNull(),
     _parentID: uuid("_parent_id").notNull(),
@@ -456,6 +497,30 @@ export const media_rels = pgTable(
   ],
 );
 
+export const _media_v_version_subtitles = pgTable(
+  "_media_v_version_subtitles",
+  {
+    _order: integer("_order").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+    id: uuid("id").defaultRandom().primaryKey(),
+    locale: enum__media_v_version_subtitles_locale("locale"),
+    file: uuid("file_id").references(() => media.id, {
+      onDelete: "set null",
+    }),
+    _uuid: varchar("_uuid"),
+  },
+  (columns) => [
+    index("_media_v_version_subtitles_order_idx").on(columns._order),
+    index("_media_v_version_subtitles_parent_id_idx").on(columns._parentID),
+    index("_media_v_version_subtitles_file_idx").on(columns.file),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [_media_v.id],
+      name: "_media_v_version_subtitles_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
 export const _media_v = pgTable(
   "_media_v",
   {
@@ -463,6 +528,10 @@ export const _media_v = pgTable(
     parent: uuid("parent_id").references(() => media.id, {
       onDelete: "set null",
     }),
+    version_visibility: enum__media_v_version_visibility("version_visibility")
+      .notNull()
+      .default("public"),
+    version_duration: numeric("version_duration", { mode: "number" }),
     version__h_folders: uuid("version__h_folders_id").references(
       () => folders.id,
       {
@@ -608,7 +677,7 @@ export const _media_v = pgTable(
 export const _media_v_locales = pgTable(
   "_media_v_locales",
   {
-    version_alt: varchar("version_alt").notNull(),
+    version_alt: varchar("version_alt"),
     id: serial("id").primaryKey(),
     _locale: enum__locales("_locale").notNull(),
     _parentID: uuid("_parent_id").notNull(),
@@ -2853,6 +2922,21 @@ export const relations__pages_v = relations(_pages_v, ({ one, many }) => ({
     relationName: "_rels",
   }),
 }));
+export const relations_media_subtitles = relations(
+  media_subtitles,
+  ({ one }) => ({
+    _parentID: one(media, {
+      fields: [media_subtitles._parentID],
+      references: [media.id],
+      relationName: "subtitles",
+    }),
+    file: one(media, {
+      fields: [media_subtitles.file],
+      references: [media.id],
+      relationName: "file",
+    }),
+  }),
+);
 export const relations_media_locales = relations(media_locales, ({ one }) => ({
   _parentID: one(media, {
     fields: [media_locales._parentID],
@@ -2878,6 +2962,9 @@ export const relations_media_rels = relations(media_rels, ({ one }) => ({
   }),
 }));
 export const relations_media = relations(media, ({ one, many }) => ({
+  subtitles: many(media_subtitles, {
+    relationName: "subtitles",
+  }),
   _h_folders: one(folders, {
     fields: [media._h_folders],
     references: [folders.id],
@@ -2890,6 +2977,21 @@ export const relations_media = relations(media, ({ one, many }) => ({
     relationName: "_rels",
   }),
 }));
+export const relations__media_v_version_subtitles = relations(
+  _media_v_version_subtitles,
+  ({ one }) => ({
+    _parentID: one(_media_v, {
+      fields: [_media_v_version_subtitles._parentID],
+      references: [_media_v.id],
+      relationName: "version_subtitles",
+    }),
+    file: one(media, {
+      fields: [_media_v_version_subtitles.file],
+      references: [media.id],
+      relationName: "file",
+    }),
+  }),
+);
 export const relations__media_v_locales = relations(
   _media_v_locales,
   ({ one }) => ({
@@ -2922,6 +3024,9 @@ export const relations__media_v = relations(_media_v, ({ one, many }) => ({
     fields: [_media_v.parent],
     references: [media.id],
     relationName: "parent",
+  }),
+  version_subtitles: many(_media_v_version_subtitles, {
+    relationName: "version_subtitles",
   }),
   version__h_folders: one(folders, {
     fields: [_media_v.version__h_folders],
@@ -3751,6 +3856,10 @@ type DatabaseSchema = {
   enum_pages_status: typeof enum_pages_status;
   enum__pages_v_published_locale: typeof enum__pages_v_published_locale;
   enum__pages_v_version_status: typeof enum__pages_v_version_status;
+  enum_media_subtitles_locale: typeof enum_media_subtitles_locale;
+  enum_media_visibility: typeof enum_media_visibility;
+  enum__media_v_version_subtitles_locale: typeof enum__media_v_version_subtitles_locale;
+  enum__media_v_version_visibility: typeof enum__media_v_version_visibility;
   enum_admins_role: typeof enum_admins_role;
   enum__admins_v_version_role: typeof enum__admins_v_version_role;
   enum_users_locale: typeof enum_users_locale;
@@ -3774,9 +3883,11 @@ type DatabaseSchema = {
   _pages_v: typeof _pages_v;
   _pages_v_locales: typeof _pages_v_locales;
   _pages_v_rels: typeof _pages_v_rels;
+  media_subtitles: typeof media_subtitles;
   media: typeof media;
   media_locales: typeof media_locales;
   media_rels: typeof media_rels;
+  _media_v_version_subtitles: typeof _media_v_version_subtitles;
   _media_v: typeof _media_v;
   _media_v_locales: typeof _media_v_locales;
   _media_v_rels: typeof _media_v_rels;
@@ -3851,9 +3962,11 @@ type DatabaseSchema = {
   relations__pages_v_locales: typeof relations__pages_v_locales;
   relations__pages_v_rels: typeof relations__pages_v_rels;
   relations__pages_v: typeof relations__pages_v;
+  relations_media_subtitles: typeof relations_media_subtitles;
   relations_media_locales: typeof relations_media_locales;
   relations_media_rels: typeof relations_media_rels;
   relations_media: typeof relations_media;
+  relations__media_v_version_subtitles: typeof relations__media_v_version_subtitles;
   relations__media_v_locales: typeof relations__media_v_locales;
   relations__media_v_rels: typeof relations__media_v_rels;
   relations__media_v: typeof relations__media_v;

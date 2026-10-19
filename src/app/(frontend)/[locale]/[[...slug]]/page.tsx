@@ -36,7 +36,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: pageSlug === HOME_SLUG ? undefined : page.meta?.title || page.title,
     description: page.meta?.description ?? undefined,
     alternates: alternatesFor(pageSlug, locale, publishedLocales),
-    openGraph: image?.url ? { images: [{ url: image.url, alt: image.alt }] } : undefined,
+    openGraph: image?.url
+      ? { images: [{ url: image.url, alt: image.alt ?? undefined }] }
+      : undefined,
   }
 }
 

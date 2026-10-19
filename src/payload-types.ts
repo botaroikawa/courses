@@ -234,7 +234,25 @@ export interface Page {
  */
 export interface Media {
   id: string;
-  alt: string;
+  alt?: string | null;
+  /**
+   * Private files can only be opened by staff.
+   */
+  visibility: 'public' | 'private';
+  /**
+   * Seconds, read from the file.
+   */
+  duration?: number | null;
+  /**
+   * WebVTT (.vtt) files, at most one per language.
+   */
+  subtitles?:
+    | {
+        locale: 'en' | 'es' | 'ca';
+        file: string | Media;
+        id?: string | null;
+      }[]
+    | null;
   _h_folders?: (string | null) | Folder;
   _h_tags?: (string | Tag)[] | null;
   prefix?: string | null;
@@ -733,6 +751,15 @@ export interface PagesSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  visibility?: T;
+  duration?: T;
+  subtitles?:
+    | T
+    | {
+        locale?: T;
+        file?: T;
+        id?: T;
+      };
   _h_folders?: T;
   _h_tags?: T;
   prefix?: T;

@@ -14,11 +14,9 @@ RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Public URLs are inlined into the client bundle, so they must be known at build time
+# The public URL is inlined into the client bundle, so it must be known at build time
 ARG NEXT_PUBLIC_SITE_URL
-ARG NEXT_PUBLIC_MEDIA_URL
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
-  NEXT_PUBLIC_MEDIA_URL=$NEXT_PUBLIC_MEDIA_URL \
   NEXT_TELEMETRY_DISABLED=1 \
   SKIP_ENV_VALIDATION=true
 RUN pnpm build

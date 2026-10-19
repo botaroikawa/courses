@@ -19,6 +19,7 @@ import { Brand } from './globals/brand'
 import { Footer } from './globals/footer'
 import { Header } from './globals/header'
 import { transport } from './lib/email/transport'
+import { s3Config } from './lib/storage'
 import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
@@ -66,23 +67,12 @@ export default buildConfig({
   storage: [
     s3Storage({
       bucket: env.S3_BUCKET,
-      config: {
-        endpoint: env.S3_ENDPOINT,
-        region: env.S3_REGION,
-        forcePathStyle: true,
-        credentials: {
-          accessKeyId: env.S3_ACCESS_KEY_ID,
-          secretAccessKey: env.S3_SECRET_ACCESS_KEY,
-        },
-      },
-      collections: {
-        media: {
-          // Files are served straight from the public bucket / CDN, not through Payload
-          disablePayloadAccessControl: true,
-          generateFileURL: ({ filename, prefix }) =>
-            [env.NEXT_PUBLIC_MEDIA_URL, prefix, filename].filter(Boolean).join('/'),
-        },
-      },
+      config: s3Config,
+      // The browser uploads straight to the bucket, so large videos never pass through the server
+      clientUploads: true,
+      // The bucket is private: files are served by Payload at /api/media/file/<name> after the
+      // collection's read access allows it (see docs/media.md)
+      collections: { media: true },
     }),
   ],
   plugins: [

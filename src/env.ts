@@ -34,11 +34,9 @@ export const env = createEnv({
   },
   client: {
     NEXT_PUBLIC_SITE_URL: z.url(),
-    NEXT_PUBLIC_MEDIA_URL: z.url(),
   },
   experimental__runtimeEnv: {
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
-    NEXT_PUBLIC_MEDIA_URL: process.env.NEXT_PUBLIC_MEDIA_URL,
   },
   // Docker image builds run without runtime secrets
   skipValidation: process.env.SKIP_ENV_VALIDATION === 'true',

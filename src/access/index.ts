@@ -22,4 +22,10 @@ export const publishedOrStaff: Access = ({ req }) => {
   return { _status: { equals: 'published' } }
 }
 
+// Staff see every file, everyone else only those marked public. Also guards the file endpoint.
+export const publicOrStaff: Access = ({ req }) => {
+  if (req.user) return true
+  return { visibility: { equals: 'public' } }
+}
+
 export const never: FieldAccess = () => false

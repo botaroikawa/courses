@@ -7,24 +7,16 @@ import createNextIntlPlugin from 'next-intl/plugin'
 const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
 
-const mediaUrl = process.env.NEXT_PUBLIC_MEDIA_URL
-  ? new URL(process.env.NEXT_PUBLIC_MEDIA_URL)
+// Payload serves uploads from its own origin, at absolute URLs built from the site URL
+const mediaFiles = process.env.NEXT_PUBLIC_SITE_URL
+  ? new URL('/api/media/file/**', process.env.NEXT_PUBLIC_SITE_URL)
   : null
 
 const nextConfig: NextConfig = {
   output: 'standalone',
   images: {
-    remotePatterns: mediaUrl
-      ? [
-          {
-            protocol: mediaUrl.protocol.replace(':', '') as 'http' | 'https',
-            hostname: mediaUrl.hostname,
-            port: mediaUrl.port,
-            pathname: `${mediaUrl.pathname.replace(/\/$/, '')}/**`,
-          },
-        ]
-      : [],
-    // SeaweedFS runs on localhost in development
+    remotePatterns: mediaFiles ? [mediaFiles] : [],
+    // The site itself runs on localhost in development
     dangerouslyAllowLocalIP: process.env.NODE_ENV !== 'production',
   },
   webpack: (webpackConfig) => {

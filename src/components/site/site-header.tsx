@@ -21,7 +21,7 @@ export async function SiteHeader({ locale }: { locale: Locale }) {
             <>
               <Image
                 src={logo.url}
-                alt={logo.alt}
+                alt={logo.alt || brand.siteName}
                 width={logo.width ?? 32}
                 height={logo.height ?? 32}
                 className={logoDark?.url ? 'h-8 w-auto dark:hidden' : 'h-8 w-auto'}
@@ -29,7 +29,7 @@ export async function SiteHeader({ locale }: { locale: Locale }) {
               {logoDark?.url && (
                 <Image
                   src={logoDark.url}
-                  alt={logoDark.alt}
+                  alt={logoDark.alt || brand.siteName}
                   width={logoDark.width ?? 32}
                   height={logoDark.height ?? 32}
                   className="hidden h-8 w-auto dark:block"

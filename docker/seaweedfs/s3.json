@@ -4,10 +4,6 @@
       "name": "app",
       "credentials": [{ "accessKey": "local-access-key", "secretKey": "local-secret-key" }],
       "actions": ["Admin", "Read", "List", "Tagging", "Write"]
-    },
-    {
-      "name": "anonymous",
-      "actions": ["Read"]
     }
   ]
 }
