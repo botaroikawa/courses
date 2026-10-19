@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { isAdmin, isStaff } from '@/access'
+import { canManageStudents } from '@/access'
 import { defaultLocale, locales } from '@/i18n/routing'
 import { motionPreferences, themePreferences } from '@/lib/preferences/options'
 
@@ -15,10 +15,10 @@ export const Users: CollectionConfig = {
     group: 'Students',
   },
   access: {
-    read: isStaff,
-    create: isAdmin,
-    update: isAdmin,
-    delete: isAdmin,
+    read: canManageStudents,
+    create: canManageStudents,
+    update: canManageStudents,
+    delete: canManageStudents,
   },
   hooks: {
     // Deleting from the admin panel must not leave orphaned credentials or sessions behind

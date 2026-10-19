@@ -62,17 +62,21 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_A29B61E3".
+ * via the `definition` "LexicalNodes_21352ABF".
  */
-export type LexicalNodes_A29B61E3 =
+export type LexicalNodes_21352ABF =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_A29B61E3>
+  | SerializedParagraphNode<LexicalNodes_21352ABF>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_A29B61E3>
+  | SerializedQuoteNode<LexicalNodes_21352ABF>
   | SerializedRelationshipNode<
+      | 'courses'
+      | 'lessons'
+      | 'categories'
+      | 'instructors'
       | 'pages'
       | 'folders'
       | 'tags'
@@ -87,11 +91,11 @@ export type LexicalNodes_A29B61E3 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_A29B61E3, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_A29B61E3, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_A29B61E3>
-  | SerializedListItemNode<LexicalNodes_A29B61E3>
-  | SerializedHeadingNode<LexicalNodes_A29B61E3>;
+  | SerializedAutoLinkNode<LexicalNodes_21352ABF, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_21352ABF, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_21352ABF>
+  | SerializedListItemNode<LexicalNodes_21352ABF>
+  | SerializedHeadingNode<LexicalNodes_21352ABF>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_3DE324E4".
@@ -111,6 +115,10 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    courses: Course;
+    lessons: Lesson;
+    categories: Category;
+    instructors: Instructor;
     pages: Page;
     media: Media;
     folders: Folder;
@@ -129,6 +137,10 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    courses: CoursesSelect<false> | CoursesSelect<true>;
+    lessons: LessonsSelect<false> | LessonsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    instructors: InstructorsSelect<false> | InstructorsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     folders: FoldersSelect<false> | FoldersSelect<true>;
@@ -200,14 +212,39 @@ export interface AdminAuthOperations {
   };
 }
 /**
+ * To retire a course without losing enrollments, unpublish it instead of deleting it. Deleting a course leaves its lessons without a course.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages".
+ * via the `definition` "courses".
  */
-export interface Page {
+export interface Course {
   id: string;
   title: string;
-  slug: string;
-  content?: LexicalRichText<LexicalNodes_A29B61E3> | null;
+  /**
+   * One or two sentences for course cards and search results.
+   */
+  summary: string;
+  cover?: (string | null) | Media;
+  description?: LexicalRichText<LexicalNodes_21352ABF> | null;
+  outcomes?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  requirements?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  modules?:
+    | {
+        title: string;
+        lessons?: (string | Lesson)[] | null;
+        id?: string | null;
+      }[]
+    | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -216,6 +253,16 @@ export interface Page {
      */
     image?: (string | null) | Media;
   };
+  slug: string;
+  level: 'beginner' | 'intermediate' | 'advanced';
+  category: string | Category;
+  instructors?: (string | Instructor)[] | null;
+  /**
+   * Shown first in the catalogue and on the home page.
+   */
+  featured?: boolean | null;
+  enrollmentCount?: number | null;
+  firstPublishedAt?: string | null;
   createdBy?: {
     relationTo: 'admins';
     value: string | Admin;
@@ -396,6 +443,142 @@ export interface Tag {
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
+}
+/**
+ * Add a lesson to a course from the course syllabus. To retire a lesson without losing student progress, unpublish it instead of deleting it.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lessons".
+ */
+export interface Lesson {
+  id: string;
+  title: string;
+  /**
+   * Shown in the course syllabus and in search results.
+   */
+  summary?: string | null;
+  content?: LexicalRichText<LexicalNodes_21352ABF> | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+  };
+  /**
+   * Generated from the title when empty. Unique within the course.
+   */
+  slug: string;
+  /**
+   * Set from the course syllabus once the course is published.
+   */
+  course?: (string | null) | Course;
+  /**
+   * Readable without an account, and the only lessons search engines index.
+   */
+  freePreview?: boolean | null;
+  /**
+   * Minutes, computed on save.
+   */
+  readingTime?: number | null;
+  firstPublishedAt?: string | null;
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
+  _order?: string | null;
+  name: string;
+  slug: string;
+  /**
+   * Shown on the category page.
+   */
+  description?: string | null;
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "instructors".
+ */
+export interface Instructor {
+  id: string;
+  name: string;
+  slug: string;
+  /**
+   * For example "Product designer".
+   */
+  headline?: string | null;
+  photo?: (string | null) | Media;
+  bio?: LexicalRichText<LexicalNodes_21352ABF> | null;
+  links?:
+    | {
+        label: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: string;
+  title: string;
+  slug: string;
+  content?: LexicalRichText<LexicalNodes_21352ABF> | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+  };
+  createdBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedBy?: {
+    relationTo: 'admins';
+    value: string | Admin;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -625,6 +808,22 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'courses';
+        value: string | Course;
+      } | null)
+    | ({
+        relationTo: 'lessons';
+        value: string | Lesson;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'instructors';
+        value: string | Instructor;
+      } | null)
+    | ({
         relationTo: 'pages';
         value: string | Page;
       } | null)
@@ -723,6 +922,116 @@ export interface PayloadLlmInstruction {
   } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "courses_select".
+ */
+export interface CoursesSelect<T extends boolean = true> {
+  title?: T;
+  summary?: T;
+  cover?: T;
+  description?: T;
+  outcomes?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  requirements?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  modules?:
+    | T
+    | {
+        title?: T;
+        lessons?: T;
+        id?: T;
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  slug?: T;
+  level?: T;
+  category?: T;
+  instructors?: T;
+  featured?: T;
+  enrollmentCount?: T;
+  firstPublishedAt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lessons_select".
+ */
+export interface LessonsSelect<T extends boolean = true> {
+  title?: T;
+  summary?: T;
+  content?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  slug?: T;
+  course?: T;
+  freePreview?: T;
+  readingTime?: T;
+  firstPublishedAt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  _order?: T;
+  name?: T;
+  slug?: T;
+  description?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "instructors_select".
+ */
+export interface InstructorsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  headline?: T;
+  photo?: T;
+  bio?: T;
+  links?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1252,7 +1561,17 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'pages' | 'media' | 'folders' | 'tags' | 'admins' | 'users';
+    relatedCollection:
+      | 'courses'
+      | 'lessons'
+      | 'categories'
+      | 'instructors'
+      | 'pages'
+      | 'media'
+      | 'folders'
+      | 'tags'
+      | 'admins'
+      | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -1274,7 +1593,20 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('pages' | 'media' | 'folders' | 'tags' | 'admins' | 'users')[] | null;
+    excludedCollections?:
+      | (
+          | 'courses'
+          | 'lessons'
+          | 'categories'
+          | 'instructors'
+          | 'pages'
+          | 'media'
+          | 'folders'
+          | 'tags'
+          | 'admins'
+          | 'users'
+        )[]
+      | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
@@ -1296,10 +1628,19 @@ export interface TaskSchedulePublish {
   input: {
     type?: ('publish' | 'unpublish') | null;
     locale?: string | null;
-    doc?: {
-      relationTo: 'pages';
-      value: string | Page;
-    } | null;
+    doc?:
+      | ({
+          relationTo: 'courses';
+          value: string | Course;
+        } | null)
+      | ({
+          relationTo: 'lessons';
+          value: string | Lesson;
+        } | null)
+      | ({
+          relationTo: 'pages';
+          value: string | Page;
+        } | null);
     global?: string | null;
     user?: {
       relationTo: 'admins';

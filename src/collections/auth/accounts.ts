@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import { isAdmin, never } from '@/access'
+import { canManageStudents, never } from '@/access'
 
 const secret = (name: string, type: 'text' | 'date' = 'text'): Field =>
   ({
@@ -16,10 +16,10 @@ export const Accounts: CollectionConfig = {
   slug: 'accounts',
   admin: { hidden: true, useAsTitle: 'providerId' },
   access: {
-    read: isAdmin,
+    read: canManageStudents,
     create: () => false,
     update: () => false,
-    delete: isAdmin,
+    delete: canManageStudents,
   },
   fields: [
     { name: 'user', type: 'relationship', relationTo: 'users', required: true, index: true },

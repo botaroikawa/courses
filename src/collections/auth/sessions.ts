@@ -1,16 +1,16 @@
 import type { CollectionConfig } from 'payload'
 
-import { isAdmin, never } from '@/access'
+import { canManageStudents, never } from '@/access'
 
 // Better Auth `session` model. Hidden from the admin navigation; managed by Better Auth.
 export const Sessions: CollectionConfig = {
   slug: 'sessions',
   admin: { hidden: true, useAsTitle: 'id' },
   access: {
-    read: isAdmin,
+    read: canManageStudents,
     create: () => false,
     update: () => false,
-    delete: isAdmin,
+    delete: canManageStudents,
   },
   fields: [
     { name: 'user', type: 'relationship', relationTo: 'users', required: true, index: true },

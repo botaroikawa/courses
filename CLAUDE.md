@@ -22,7 +22,7 @@ Update the doc in the same change as the code. When a product change contradicts
 Payload owns every table and every migration, including Better Auth's. Two kinds of people:
 
 - **Staff** (`admins`): the only Payload auth collection; they use `/admin`.
-- **Students** (`users`, `sessions`, `accounts`, `verifications`): written by Better Auth (`src/lib/auth.ts`) through its Drizzle adapter on top of `src/payload-generated-schema.ts`, and managed by staff from `/admin`.
+- **Students** (`users`, `sessions`, `accounts`, `verifications`): written by Better Auth (`src/lib/auth.ts`) through its Drizzle adapter on top of `src/payload-generated-schema.ts`, and managed from `/admin` by the roles `canManageStudents` (`src/access`) allows. Editors never see student data.
 
 When you change a collection in `src/collections/auth/`, keep field names matching Better Auth's model (`fields` mapping in `auth.ts` covers renames such as `userId → user`) and run `pnpm generate:db-schema`. Future student data (progress, enrollments, plans) is regular Payload collections with a relationship to `users`.
 

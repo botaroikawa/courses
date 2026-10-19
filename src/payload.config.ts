@@ -10,7 +10,11 @@ import { buildConfig } from 'payload'
 
 import { Admins } from './collections/admins'
 import { Accounts, Sessions, Users, Verifications } from './collections/auth'
+import { Categories } from './collections/categories'
+import { Courses } from './collections/courses'
 import { Folders } from './collections/folders'
+import { Instructors } from './collections/instructors'
+import { Lessons } from './collections/lessons'
 import { Media } from './collections/media'
 import { Pages } from './collections/pages'
 import { Tags } from './collections/tags'
@@ -34,7 +38,21 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Pages, Media, Folders, Tags, Admins, Users, Sessions, Accounts, Verifications],
+  collections: [
+    Courses,
+    Lessons,
+    Categories,
+    Instructors,
+    Pages,
+    Media,
+    Folders,
+    Tags,
+    Admins,
+    Users,
+    Sessions,
+    Accounts,
+    Verifications,
+  ],
   globals: [Header, Footer, Brand],
   editor: lexicalEditor(),
   typescript: {
@@ -77,10 +95,11 @@ export default buildConfig({
   ],
   plugins: [
     seoPlugin({
-      collections: ['pages'],
+      collections: ['pages', 'courses', 'lessons'],
       uploadsCollection: 'media',
       tabbedUI: true,
       generateTitle: ({ doc }) => doc?.title,
+      generateDescription: ({ doc }) => doc?.summary,
     }),
   ],
   upload: {

@@ -10,6 +10,9 @@ export const isAdmin: Access = ({ req }) => req.user?.role === 'admin'
 
 export const isAdminField: FieldAccess = ({ req }) => req.user?.role === 'admin'
 
+// Students and everything they generate. Admins only today; a support role joins here.
+export const canManageStudents: Access = ({ req }) => req.user?.role === 'admin'
+
 export const isAdminOrSelf: Access = ({ req }) => {
   if (!req.user) return false
   if (req.user.role === 'admin') return true
@@ -20,6 +23,13 @@ export const isAdminOrSelf: Access = ({ req }) => {
 export const publishedOrStaff: Access = ({ req }) => {
   if (req.user) return true
   return { _status: { equals: 'published' } }
+}
+
+// Students authenticate with Better Auth, never with Payload, so the API only hands out free
+// previews. The site reads other lessons on the server after checking the student's session.
+export const freePreviewOrStaff: Access = ({ req }) => {
+  if (req.user) return true
+  return { _status: { equals: 'published' }, freePreview: { equals: true } }
 }
 
 // Staff see every file, everyone else only those marked public. Also guards the file endpoint.

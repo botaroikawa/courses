@@ -12,19 +12,52 @@ import {
   index,
   uniqueIndex,
   foreignKey,
+  integer,
   uuid,
   varchar,
-  timestamp,
-  jsonb,
   serial,
-  integer,
   boolean,
   numeric,
+  timestamp,
+  jsonb,
   type AnyPgColumn,
   pgEnum,
 } from "@payloadcms/db-postgres/drizzle/pg-core";
 import { sql, relations } from "@payloadcms/db-postgres/drizzle";
 export const enum__locales = pgEnum("enum__locales", ["en", "es", "ca"]);
+export const enum_courses_level = pgEnum("enum_courses_level", [
+  "beginner",
+  "intermediate",
+  "advanced",
+]);
+export const enum_courses_status = pgEnum("enum_courses_status", [
+  "draft",
+  "published",
+]);
+export const enum__courses_v_version_level = pgEnum(
+  "enum__courses_v_version_level",
+  ["beginner", "intermediate", "advanced"],
+);
+export const enum__courses_v_published_locale = pgEnum(
+  "enum__courses_v_published_locale",
+  ["en", "es", "ca"],
+);
+export const enum__courses_v_version_status = pgEnum(
+  "enum__courses_v_version_status",
+  ["draft", "published"],
+);
+export const enum_lessons_status = pgEnum("enum_lessons_status", [
+  "draft",
+  "published",
+]);
+export const enum__lessons_v_published_locale = pgEnum(
+  "enum__lessons_v_published_locale",
+  ["en", "es", "ca"],
+);
+export const enum__lessons_v_version_status = pgEnum(
+  "enum__lessons_v_version_status",
+  ["draft", "published"],
+);
 export const enum_pages_status = pgEnum("enum_pages_status", [
   "draft",
   "published",
@@ -118,6 +151,1096 @@ export const enum_footer_nav_items_link_type = pgEnum(
 export const enum__footer_v_version_nav_items_link_type = pgEnum(
   "enum__footer_v_version_nav_items_link_type",
   ["internal", "external"],
+);
+
+export const courses_outcomes = pgTable(
+  "courses_outcomes",
+  {
+    _order: integer("_order").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+    _locale: enum__locales("_locale").notNull(),
+    id: varchar("id").primaryKey(),
+    text: varchar("text"),
+  },
+  (columns) => [
+    index("courses_outcomes_order_idx").on(columns._order),
+    index("courses_outcomes_parent_id_idx").on(columns._parentID),
+    index("courses_outcomes_locale_idx").on(columns._locale),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [courses.id],
+      name: "courses_outcomes_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const courses_requirements = pgTable(
+  "courses_requirements",
+  {
+    _order: integer("_order").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+    _locale: enum__locales("_locale").notNull(),
+    id: varchar("id").primaryKey(),
+    text: varchar("text"),
+  },
+  (columns) => [
+    index("courses_requirements_order_idx").on(columns._order),
+    index("courses_requirements_parent_id_idx").on(columns._parentID),
+    index("courses_requirements_locale_idx").on(columns._locale),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [courses.id],
+      name: "courses_requirements_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const courses_modules = pgTable(
+  "courses_modules",
+  {
+    _order: integer("_order").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+    id: varchar("id").primaryKey(),
+  },
+  (columns) => [
+    index("courses_modules_order_idx").on(columns._order),
+    index("courses_modules_parent_id_idx").on(columns._parentID),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [courses.id],
+      name: "courses_modules_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const courses_modules_locales = pgTable(
+  "courses_modules_locales",
+  {
+    title: varchar("title"),
+    id: serial("id").primaryKey(),
+    _locale: enum__locales("_locale").notNull(),
+    _parentID: varchar("_parent_id").notNull(),
+  },
+  (columns) => [
+    uniqueIndex("courses_modules_locales_locale_parent_id_unique").on(
+      columns._locale,
+      columns._parentID,
+    ),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [courses_modules.id],
+      name: "courses_modules_locales_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const courses = pgTable(
+  "courses",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    cover: uuid("cover_id").references(() => media.id, {
+      onDelete: "set null",
+    }),
+    slug: varchar("slug"),
+    level: enum_courses_level("level"),
+    category: uuid("category_id").references(() => categories.id, {
+      onDelete: "set null",
+    }),
+    featured: boolean("featured").default(false),
+    enrollmentCount: numeric("enrollment_count", { mode: "number" }).default(0),
+    updatedAt: timestamp("updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index("courses_cover_idx").on(columns.cover),
+    uniqueIndex("courses_slug_idx").on(columns.slug),
+    index("courses_category_idx").on(columns.category),
+    index("courses_updated_at_idx").on(columns.updatedAt),
+    index("courses_created_at_idx").on(columns.createdAt),
+  ],
+);
+
+export const courses_locales = pgTable(
+  "courses_locales",
+  {
+    title: varchar("title"),
+    summary: varchar("summary"),
+    description: jsonb("description"),
+    meta_title: varchar("meta_title"),
+    meta_description: varchar("meta_description"),
+    meta_image: uuid("meta_image_id").references(() => media.id, {
+      onDelete: "set null",
+    }),
+    firstPublishedAt: timestamp("first_published_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    _status: enum_courses_status("_status").default("draft"),
+    id: serial("id").primaryKey(),
+    _locale: enum__locales("_locale").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+  },
+  (columns) => [
+    index("courses_meta_meta_image_idx").on(
+      columns.meta_image,
+      columns._locale,
+    ),
+    index("courses_first_published_at_idx").on(
+      columns.firstPublishedAt,
+      columns._locale,
+    ),
+    index("courses__status_idx").on(columns._status, columns._locale),
+    uniqueIndex("courses_locales_locale_parent_id_unique").on(
+      columns._locale,
+      columns._parentID,
+    ),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [courses.id],
+      name: "courses_locales_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const courses_rels = pgTable(
+  "courses_rels",
+  {
+    id: serial("id").primaryKey(),
+    order: integer("order"),
+    parent: uuid("parent_id").notNull(),
+    path: varchar("path").notNull(),
+    lessonsID: uuid("lessons_id"),
+    instructorsID: uuid("instructors_id"),
+    adminsID: uuid("admins_id"),
+  },
+  (columns) => [
+    index("courses_rels_order_idx").on(columns.order),
+    index("courses_rels_parent_idx").on(columns.parent),
+    index("courses_rels_path_idx").on(columns.path),
+    index("courses_rels_lessons_id_idx").on(columns.lessonsID),
+    index("courses_rels_instructors_id_idx").on(columns.instructorsID),
+    index("courses_rels_admins_id_idx").on(columns.adminsID),
+    foreignKey({
+      columns: [columns["parent"]],
+      foreignColumns: [courses.id],
+      name: "courses_rels_parent_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["lessonsID"]],
+      foreignColumns: [lessons.id],
+      name: "courses_rels_lessons_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["instructorsID"]],
+      foreignColumns: [instructors.id],
+      name: "courses_rels_instructors_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["adminsID"]],
+      foreignColumns: [admins.id],
+      name: "courses_rels_admins_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const _courses_v_version_outcomes = pgTable(
+  "_courses_v_version_outcomes",
+  {
+    _order: integer("_order").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+    _locale: enum__locales("_locale").notNull(),
+    id: uuid("id").defaultRandom().primaryKey(),
+    text: varchar("text"),
+    _uuid: varchar("_uuid"),
+  },
+  (columns) => [
+    index("_courses_v_version_outcomes_order_idx").on(columns._order),
+    index("_courses_v_version_outcomes_parent_id_idx").on(columns._parentID),
+    index("_courses_v_version_outcomes_locale_idx").on(columns._locale),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [_courses_v.id],
+      name: "_courses_v_version_outcomes_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const _courses_v_version_requirements = pgTable(
+  "_courses_v_version_requirements",
+  {
+    _order: integer("_order").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+    _locale: enum__locales("_locale").notNull(),
+    id: uuid("id").defaultRandom().primaryKey(),
+    text: varchar("text"),
+    _uuid: varchar("_uuid"),
+  },
+  (columns) => [
+    index("_courses_v_version_requirements_order_idx").on(columns._order),
+    index("_courses_v_version_requirements_parent_id_idx").on(
+      columns._parentID,
+    ),
+    index("_courses_v_version_requirements_locale_idx").on(columns._locale),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [_courses_v.id],
+      name: "_courses_v_version_requirements_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const _courses_v_version_modules = pgTable(
+  "_courses_v_version_modules",
+  {
+    _order: integer("_order").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+    id: uuid("id").defaultRandom().primaryKey(),
+    _uuid: varchar("_uuid"),
+  },
+  (columns) => [
+    index("_courses_v_version_modules_order_idx").on(columns._order),
+    index("_courses_v_version_modules_parent_id_idx").on(columns._parentID),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [_courses_v.id],
+      name: "_courses_v_version_modules_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const _courses_v_version_modules_locales = pgTable(
+  "_courses_v_version_modules_locales",
+  {
+    title: varchar("title"),
+    id: serial("id").primaryKey(),
+    _locale: enum__locales("_locale").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+  },
+  (columns) => [
+    uniqueIndex(
+      "_courses_v_version_modules_locales_locale_parent_id_unique",
+    ).on(columns._locale, columns._parentID),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [_courses_v_version_modules.id],
+      name: "_courses_v_version_modules_locales_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const _courses_v = pgTable(
+  "_courses_v",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    parent: uuid("parent_id").references(() => courses.id, {
+      onDelete: "set null",
+    }),
+    version_cover: uuid("version_cover_id").references(() => media.id, {
+      onDelete: "set null",
+    }),
+    version_slug: varchar("version_slug"),
+    version_level: enum__courses_v_version_level("version_level"),
+    version_category: uuid("version_category_id").references(
+      () => categories.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    version_featured: boolean("version_featured").default(false),
+    version_enrollmentCount: numeric("version_enrollment_count", {
+      mode: "number",
+    }).default(0),
+    version_updatedAt: timestamp("version_updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    version_createdAt: timestamp("version_created_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    createdAt: timestamp("created_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+    publishedLocale: enum__courses_v_published_locale("published_locale"),
+    latest: boolean("latest"),
+    autosave: boolean("autosave"),
+  },
+  (columns) => [
+    index("_courses_v_parent_idx").on(columns.parent),
+    index("_courses_v_version_version_cover_idx").on(columns.version_cover),
+    index("_courses_v_version_version_slug_idx").on(columns.version_slug),
+    index("_courses_v_version_version_category_idx").on(
+      columns.version_category,
+    ),
+    index("_courses_v_version_version_updated_at_idx").on(
+      columns.version_updatedAt,
+    ),
+    index("_courses_v_version_version_created_at_idx").on(
+      columns.version_createdAt,
+    ),
+    index("_courses_v_created_at_idx").on(columns.createdAt),
+    index("_courses_v_updated_at_idx").on(columns.updatedAt),
+    index("_courses_v_published_locale_idx").on(columns.publishedLocale),
+    index("_courses_v_latest_idx").on(columns.latest),
+    index("_courses_v_autosave_idx").on(columns.autosave),
+  ],
+);
+
+export const _courses_v_locales = pgTable(
+  "_courses_v_locales",
+  {
+    version_title: varchar("version_title"),
+    version_summary: varchar("version_summary"),
+    version_description: jsonb("version_description"),
+    version_meta_title: varchar("version_meta_title"),
+    version_meta_description: varchar("version_meta_description"),
+    version_meta_image: uuid("version_meta_image_id").references(
+      () => media.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    version_firstPublishedAt: timestamp("version_first_published_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    version__status:
+      enum__courses_v_version_status("version__status").default("draft"),
+    id: serial("id").primaryKey(),
+    _locale: enum__locales("_locale").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+  },
+  (columns) => [
+    index("_courses_v_version_meta_version_meta_image_idx").on(
+      columns.version_meta_image,
+      columns._locale,
+    ),
+    index("_courses_v_version_version_first_published_at_idx").on(
+      columns.version_firstPublishedAt,
+      columns._locale,
+    ),
+    index("_courses_v_version_version__status_idx").on(
+      columns.version__status,
+      columns._locale,
+    ),
+    uniqueIndex("_courses_v_locales_locale_parent_id_unique").on(
+      columns._locale,
+      columns._parentID,
+    ),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [_courses_v.id],
+      name: "_courses_v_locales_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const _courses_v_rels = pgTable(
+  "_courses_v_rels",
+  {
+    id: serial("id").primaryKey(),
+    order: integer("order"),
+    parent: uuid("parent_id").notNull(),
+    path: varchar("path").notNull(),
+    lessonsID: uuid("lessons_id"),
+    instructorsID: uuid("instructors_id"),
+    adminsID: uuid("admins_id"),
+  },
+  (columns) => [
+    index("_courses_v_rels_order_idx").on(columns.order),
+    index("_courses_v_rels_parent_idx").on(columns.parent),
+    index("_courses_v_rels_path_idx").on(columns.path),
+    index("_courses_v_rels_lessons_id_idx").on(columns.lessonsID),
+    index("_courses_v_rels_instructors_id_idx").on(columns.instructorsID),
+    index("_courses_v_rels_admins_id_idx").on(columns.adminsID),
+    foreignKey({
+      columns: [columns["parent"]],
+      foreignColumns: [_courses_v.id],
+      name: "_courses_v_rels_parent_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["lessonsID"]],
+      foreignColumns: [lessons.id],
+      name: "_courses_v_rels_lessons_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["instructorsID"]],
+      foreignColumns: [instructors.id],
+      name: "_courses_v_rels_instructors_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["adminsID"]],
+      foreignColumns: [admins.id],
+      name: "_courses_v_rels_admins_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const lessons = pgTable(
+  "lessons",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    slug: varchar("slug"),
+    course: uuid("course_id").references(() => courses.id, {
+      onDelete: "set null",
+    }),
+    freePreview: boolean("free_preview").default(false),
+    updatedAt: timestamp("updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index("lessons_slug_idx").on(columns.slug),
+    index("lessons_course_idx").on(columns.course),
+    index("lessons_updated_at_idx").on(columns.updatedAt),
+    index("lessons_created_at_idx").on(columns.createdAt),
+  ],
+);
+
+export const lessons_locales = pgTable(
+  "lessons_locales",
+  {
+    title: varchar("title"),
+    summary: varchar("summary"),
+    content: jsonb("content"),
+    meta_title: varchar("meta_title"),
+    meta_description: varchar("meta_description"),
+    meta_image: uuid("meta_image_id").references(() => media.id, {
+      onDelete: "set null",
+    }),
+    readingTime: numeric("reading_time", { mode: "number" }),
+    firstPublishedAt: timestamp("first_published_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    _status: enum_lessons_status("_status").default("draft"),
+    id: serial("id").primaryKey(),
+    _locale: enum__locales("_locale").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+  },
+  (columns) => [
+    index("lessons_meta_meta_image_idx").on(
+      columns.meta_image,
+      columns._locale,
+    ),
+    index("lessons_first_published_at_idx").on(
+      columns.firstPublishedAt,
+      columns._locale,
+    ),
+    index("lessons__status_idx").on(columns._status, columns._locale),
+    uniqueIndex("lessons_locales_locale_parent_id_unique").on(
+      columns._locale,
+      columns._parentID,
+    ),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [lessons.id],
+      name: "lessons_locales_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const lessons_rels = pgTable(
+  "lessons_rels",
+  {
+    id: serial("id").primaryKey(),
+    order: integer("order"),
+    parent: uuid("parent_id").notNull(),
+    path: varchar("path").notNull(),
+    adminsID: uuid("admins_id"),
+  },
+  (columns) => [
+    index("lessons_rels_order_idx").on(columns.order),
+    index("lessons_rels_parent_idx").on(columns.parent),
+    index("lessons_rels_path_idx").on(columns.path),
+    index("lessons_rels_admins_id_idx").on(columns.adminsID),
+    foreignKey({
+      columns: [columns["parent"]],
+      foreignColumns: [lessons.id],
+      name: "lessons_rels_parent_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["adminsID"]],
+      foreignColumns: [admins.id],
+      name: "lessons_rels_admins_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const _lessons_v = pgTable(
+  "_lessons_v",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    parent: uuid("parent_id").references(() => lessons.id, {
+      onDelete: "set null",
+    }),
+    version_slug: varchar("version_slug"),
+    version_course: uuid("version_course_id").references(() => courses.id, {
+      onDelete: "set null",
+    }),
+    version_freePreview: boolean("version_free_preview").default(false),
+    version_updatedAt: timestamp("version_updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    version_createdAt: timestamp("version_created_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    createdAt: timestamp("created_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+    publishedLocale: enum__lessons_v_published_locale("published_locale"),
+    latest: boolean("latest"),
+    autosave: boolean("autosave"),
+  },
+  (columns) => [
+    index("_lessons_v_parent_idx").on(columns.parent),
+    index("_lessons_v_version_version_slug_idx").on(columns.version_slug),
+    index("_lessons_v_version_version_course_idx").on(columns.version_course),
+    index("_lessons_v_version_version_updated_at_idx").on(
+      columns.version_updatedAt,
+    ),
+    index("_lessons_v_version_version_created_at_idx").on(
+      columns.version_createdAt,
+    ),
+    index("_lessons_v_created_at_idx").on(columns.createdAt),
+    index("_lessons_v_updated_at_idx").on(columns.updatedAt),
+    index("_lessons_v_published_locale_idx").on(columns.publishedLocale),
+    index("_lessons_v_latest_idx").on(columns.latest),
+    index("_lessons_v_autosave_idx").on(columns.autosave),
+  ],
+);
+
+export const _lessons_v_locales = pgTable(
+  "_lessons_v_locales",
+  {
+    version_title: varchar("version_title"),
+    version_summary: varchar("version_summary"),
+    version_content: jsonb("version_content"),
+    version_meta_title: varchar("version_meta_title"),
+    version_meta_description: varchar("version_meta_description"),
+    version_meta_image: uuid("version_meta_image_id").references(
+      () => media.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    version_readingTime: numeric("version_reading_time", { mode: "number" }),
+    version_firstPublishedAt: timestamp("version_first_published_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    version__status:
+      enum__lessons_v_version_status("version__status").default("draft"),
+    id: serial("id").primaryKey(),
+    _locale: enum__locales("_locale").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+  },
+  (columns) => [
+    index("_lessons_v_version_meta_version_meta_image_idx").on(
+      columns.version_meta_image,
+      columns._locale,
+    ),
+    index("_lessons_v_version_version_first_published_at_idx").on(
+      columns.version_firstPublishedAt,
+      columns._locale,
+    ),
+    index("_lessons_v_version_version__status_idx").on(
+      columns.version__status,
+      columns._locale,
+    ),
+    uniqueIndex("_lessons_v_locales_locale_parent_id_unique").on(
+      columns._locale,
+      columns._parentID,
+    ),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [_lessons_v.id],
+      name: "_lessons_v_locales_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const _lessons_v_rels = pgTable(
+  "_lessons_v_rels",
+  {
+    id: serial("id").primaryKey(),
+    order: integer("order"),
+    parent: uuid("parent_id").notNull(),
+    path: varchar("path").notNull(),
+    adminsID: uuid("admins_id"),
+  },
+  (columns) => [
+    index("_lessons_v_rels_order_idx").on(columns.order),
+    index("_lessons_v_rels_parent_idx").on(columns.parent),
+    index("_lessons_v_rels_path_idx").on(columns.path),
+    index("_lessons_v_rels_admins_id_idx").on(columns.adminsID),
+    foreignKey({
+      columns: [columns["parent"]],
+      foreignColumns: [_lessons_v.id],
+      name: "_lessons_v_rels_parent_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["adminsID"]],
+      foreignColumns: [admins.id],
+      name: "_lessons_v_rels_admins_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const categories = pgTable(
+  "categories",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    _order: varchar("_order"),
+    slug: varchar("slug").notNull(),
+    updatedAt: timestamp("updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index("categories__order_idx").on(columns._order),
+    uniqueIndex("categories_slug_idx").on(columns.slug),
+    index("categories_updated_at_idx").on(columns.updatedAt),
+    index("categories_created_at_idx").on(columns.createdAt),
+  ],
+);
+
+export const categories_locales = pgTable(
+  "categories_locales",
+  {
+    name: varchar("name").notNull(),
+    description: varchar("description"),
+    id: serial("id").primaryKey(),
+    _locale: enum__locales("_locale").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+  },
+  (columns) => [
+    uniqueIndex("categories_locales_locale_parent_id_unique").on(
+      columns._locale,
+      columns._parentID,
+    ),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [categories.id],
+      name: "categories_locales_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const categories_rels = pgTable(
+  "categories_rels",
+  {
+    id: serial("id").primaryKey(),
+    order: integer("order"),
+    parent: uuid("parent_id").notNull(),
+    path: varchar("path").notNull(),
+    adminsID: uuid("admins_id"),
+  },
+  (columns) => [
+    index("categories_rels_order_idx").on(columns.order),
+    index("categories_rels_parent_idx").on(columns.parent),
+    index("categories_rels_path_idx").on(columns.path),
+    index("categories_rels_admins_id_idx").on(columns.adminsID),
+    foreignKey({
+      columns: [columns["parent"]],
+      foreignColumns: [categories.id],
+      name: "categories_rels_parent_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["adminsID"]],
+      foreignColumns: [admins.id],
+      name: "categories_rels_admins_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const _categories_v = pgTable(
+  "_categories_v",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    parent: uuid("parent_id").references(() => categories.id, {
+      onDelete: "set null",
+    }),
+    version__order: varchar("version__order"),
+    version_slug: varchar("version_slug").notNull(),
+    version_updatedAt: timestamp("version_updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    version_createdAt: timestamp("version_created_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    createdAt: timestamp("created_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index("_categories_v_parent_idx").on(columns.parent),
+    index("_categories_v_version_version__order_idx").on(
+      columns.version__order,
+    ),
+    index("_categories_v_version_version_slug_idx").on(columns.version_slug),
+    index("_categories_v_version_version_updated_at_idx").on(
+      columns.version_updatedAt,
+    ),
+    index("_categories_v_version_version_created_at_idx").on(
+      columns.version_createdAt,
+    ),
+    index("_categories_v_created_at_idx").on(columns.createdAt),
+    index("_categories_v_updated_at_idx").on(columns.updatedAt),
+  ],
+);
+
+export const _categories_v_locales = pgTable(
+  "_categories_v_locales",
+  {
+    version_name: varchar("version_name").notNull(),
+    version_description: varchar("version_description"),
+    id: serial("id").primaryKey(),
+    _locale: enum__locales("_locale").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+  },
+  (columns) => [
+    uniqueIndex("_categories_v_locales_locale_parent_id_unique").on(
+      columns._locale,
+      columns._parentID,
+    ),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [_categories_v.id],
+      name: "_categories_v_locales_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const _categories_v_rels = pgTable(
+  "_categories_v_rels",
+  {
+    id: serial("id").primaryKey(),
+    order: integer("order"),
+    parent: uuid("parent_id").notNull(),
+    path: varchar("path").notNull(),
+    adminsID: uuid("admins_id"),
+  },
+  (columns) => [
+    index("_categories_v_rels_order_idx").on(columns.order),
+    index("_categories_v_rels_parent_idx").on(columns.parent),
+    index("_categories_v_rels_path_idx").on(columns.path),
+    index("_categories_v_rels_admins_id_idx").on(columns.adminsID),
+    foreignKey({
+      columns: [columns["parent"]],
+      foreignColumns: [_categories_v.id],
+      name: "_categories_v_rels_parent_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["adminsID"]],
+      foreignColumns: [admins.id],
+      name: "_categories_v_rels_admins_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const instructors_links = pgTable(
+  "instructors_links",
+  {
+    _order: integer("_order").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+    id: varchar("id").primaryKey(),
+    label: varchar("label").notNull(),
+    url: varchar("url").notNull(),
+  },
+  (columns) => [
+    index("instructors_links_order_idx").on(columns._order),
+    index("instructors_links_parent_id_idx").on(columns._parentID),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [instructors.id],
+      name: "instructors_links_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const instructors = pgTable(
+  "instructors",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: varchar("name").notNull(),
+    slug: varchar("slug").notNull(),
+    photo: uuid("photo_id").references(() => media.id, {
+      onDelete: "set null",
+    }),
+    updatedAt: timestamp("updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex("instructors_slug_idx").on(columns.slug),
+    index("instructors_photo_idx").on(columns.photo),
+    index("instructors_updated_at_idx").on(columns.updatedAt),
+    index("instructors_created_at_idx").on(columns.createdAt),
+  ],
+);
+
+export const instructors_locales = pgTable(
+  "instructors_locales",
+  {
+    headline: varchar("headline"),
+    bio: jsonb("bio"),
+    id: serial("id").primaryKey(),
+    _locale: enum__locales("_locale").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+  },
+  (columns) => [
+    uniqueIndex("instructors_locales_locale_parent_id_unique").on(
+      columns._locale,
+      columns._parentID,
+    ),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [instructors.id],
+      name: "instructors_locales_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const instructors_rels = pgTable(
+  "instructors_rels",
+  {
+    id: serial("id").primaryKey(),
+    order: integer("order"),
+    parent: uuid("parent_id").notNull(),
+    path: varchar("path").notNull(),
+    adminsID: uuid("admins_id"),
+  },
+  (columns) => [
+    index("instructors_rels_order_idx").on(columns.order),
+    index("instructors_rels_parent_idx").on(columns.parent),
+    index("instructors_rels_path_idx").on(columns.path),
+    index("instructors_rels_admins_id_idx").on(columns.adminsID),
+    foreignKey({
+      columns: [columns["parent"]],
+      foreignColumns: [instructors.id],
+      name: "instructors_rels_parent_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["adminsID"]],
+      foreignColumns: [admins.id],
+      name: "instructors_rels_admins_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const _instructors_v_version_links = pgTable(
+  "_instructors_v_version_links",
+  {
+    _order: integer("_order").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+    id: uuid("id").defaultRandom().primaryKey(),
+    label: varchar("label").notNull(),
+    url: varchar("url").notNull(),
+    _uuid: varchar("_uuid"),
+  },
+  (columns) => [
+    index("_instructors_v_version_links_order_idx").on(columns._order),
+    index("_instructors_v_version_links_parent_id_idx").on(columns._parentID),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [_instructors_v.id],
+      name: "_instructors_v_version_links_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const _instructors_v = pgTable(
+  "_instructors_v",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    parent: uuid("parent_id").references(() => instructors.id, {
+      onDelete: "set null",
+    }),
+    version_name: varchar("version_name").notNull(),
+    version_slug: varchar("version_slug").notNull(),
+    version_photo: uuid("version_photo_id").references(() => media.id, {
+      onDelete: "set null",
+    }),
+    version_updatedAt: timestamp("version_updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    version_createdAt: timestamp("version_created_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    createdAt: timestamp("created_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index("_instructors_v_parent_idx").on(columns.parent),
+    index("_instructors_v_version_version_slug_idx").on(columns.version_slug),
+    index("_instructors_v_version_version_photo_idx").on(columns.version_photo),
+    index("_instructors_v_version_version_updated_at_idx").on(
+      columns.version_updatedAt,
+    ),
+    index("_instructors_v_version_version_created_at_idx").on(
+      columns.version_createdAt,
+    ),
+    index("_instructors_v_created_at_idx").on(columns.createdAt),
+    index("_instructors_v_updated_at_idx").on(columns.updatedAt),
+  ],
+);
+
+export const _instructors_v_locales = pgTable(
+  "_instructors_v_locales",
+  {
+    version_headline: varchar("version_headline"),
+    version_bio: jsonb("version_bio"),
+    id: serial("id").primaryKey(),
+    _locale: enum__locales("_locale").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+  },
+  (columns) => [
+    uniqueIndex("_instructors_v_locales_locale_parent_id_unique").on(
+      columns._locale,
+      columns._parentID,
+    ),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [_instructors_v.id],
+      name: "_instructors_v_locales_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const _instructors_v_rels = pgTable(
+  "_instructors_v_rels",
+  {
+    id: serial("id").primaryKey(),
+    order: integer("order"),
+    parent: uuid("parent_id").notNull(),
+    path: varchar("path").notNull(),
+    adminsID: uuid("admins_id"),
+  },
+  (columns) => [
+    index("_instructors_v_rels_order_idx").on(columns.order),
+    index("_instructors_v_rels_parent_idx").on(columns.parent),
+    index("_instructors_v_rels_path_idx").on(columns.path),
+    index("_instructors_v_rels_admins_id_idx").on(columns.adminsID),
+    foreignKey({
+      columns: [columns["parent"]],
+      foreignColumns: [_instructors_v.id],
+      name: "_instructors_v_rels_parent_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["adminsID"]],
+      foreignColumns: [admins.id],
+      name: "_instructors_v_rels_admins_fk",
+    }).onDelete("cascade"),
+  ],
 );
 
 export const pages = pgTable(
@@ -1992,6 +3115,10 @@ export const payload_locked_documents_rels = pgTable(
     order: integer("order"),
     parent: uuid("parent_id").notNull(),
     path: varchar("path").notNull(),
+    coursesID: uuid("courses_id"),
+    lessonsID: uuid("lessons_id"),
+    categoriesID: uuid("categories_id"),
+    instructorsID: uuid("instructors_id"),
     pagesID: uuid("pages_id"),
     mediaID: uuid("media_id"),
     foldersID: uuid("folders_id"),
@@ -2006,6 +3133,14 @@ export const payload_locked_documents_rels = pgTable(
     index("payload_locked_documents_rels_order_idx").on(columns.order),
     index("payload_locked_documents_rels_parent_idx").on(columns.parent),
     index("payload_locked_documents_rels_path_idx").on(columns.path),
+    index("payload_locked_documents_rels_courses_id_idx").on(columns.coursesID),
+    index("payload_locked_documents_rels_lessons_id_idx").on(columns.lessonsID),
+    index("payload_locked_documents_rels_categories_id_idx").on(
+      columns.categoriesID,
+    ),
+    index("payload_locked_documents_rels_instructors_id_idx").on(
+      columns.instructorsID,
+    ),
     index("payload_locked_documents_rels_pages_id_idx").on(columns.pagesID),
     index("payload_locked_documents_rels_media_id_idx").on(columns.mediaID),
     index("payload_locked_documents_rels_folders_id_idx").on(columns.foldersID),
@@ -2025,6 +3160,26 @@ export const payload_locked_documents_rels = pgTable(
       columns: [columns["parent"]],
       foreignColumns: [payload_locked_documents.id],
       name: "payload_locked_documents_rels_parent_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["coursesID"]],
+      foreignColumns: [courses.id],
+      name: "payload_locked_documents_rels_courses_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["lessonsID"]],
+      foreignColumns: [lessons.id],
+      name: "payload_locked_documents_rels_lessons_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["categoriesID"]],
+      foreignColumns: [categories.id],
+      name: "payload_locked_documents_rels_categories_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["instructorsID"]],
+      foreignColumns: [instructors.id],
+      name: "payload_locked_documents_rels_instructors_fk",
     }).onDelete("cascade"),
     foreignKey({
       columns: [columns["pagesID"]],
@@ -2850,6 +4005,503 @@ export const payload_jobs_stats = pgTable("payload_jobs_stats", {
   }),
 });
 
+export const relations_courses_outcomes = relations(
+  courses_outcomes,
+  ({ one }) => ({
+    _parentID: one(courses, {
+      fields: [courses_outcomes._parentID],
+      references: [courses.id],
+      relationName: "outcomes",
+    }),
+  }),
+);
+export const relations_courses_requirements = relations(
+  courses_requirements,
+  ({ one }) => ({
+    _parentID: one(courses, {
+      fields: [courses_requirements._parentID],
+      references: [courses.id],
+      relationName: "requirements",
+    }),
+  }),
+);
+export const relations_courses_modules_locales = relations(
+  courses_modules_locales,
+  ({ one }) => ({
+    _parentID: one(courses_modules, {
+      fields: [courses_modules_locales._parentID],
+      references: [courses_modules.id],
+      relationName: "_locales",
+    }),
+  }),
+);
+export const relations_courses_modules = relations(
+  courses_modules,
+  ({ one, many }) => ({
+    _parentID: one(courses, {
+      fields: [courses_modules._parentID],
+      references: [courses.id],
+      relationName: "modules",
+    }),
+    _locales: many(courses_modules_locales, {
+      relationName: "_locales",
+    }),
+  }),
+);
+export const relations_courses_locales = relations(
+  courses_locales,
+  ({ one }) => ({
+    _parentID: one(courses, {
+      fields: [courses_locales._parentID],
+      references: [courses.id],
+      relationName: "_locales",
+    }),
+    meta_image: one(media, {
+      fields: [courses_locales.meta_image],
+      references: [media.id],
+      relationName: "meta_image",
+    }),
+  }),
+);
+export const relations_courses_rels = relations(courses_rels, ({ one }) => ({
+  parent: one(courses, {
+    fields: [courses_rels.parent],
+    references: [courses.id],
+    relationName: "_rels",
+  }),
+  lessonsID: one(lessons, {
+    fields: [courses_rels.lessonsID],
+    references: [lessons.id],
+    relationName: "lessons",
+  }),
+  instructorsID: one(instructors, {
+    fields: [courses_rels.instructorsID],
+    references: [instructors.id],
+    relationName: "instructors",
+  }),
+  adminsID: one(admins, {
+    fields: [courses_rels.adminsID],
+    references: [admins.id],
+    relationName: "admins",
+  }),
+}));
+export const relations_courses = relations(courses, ({ one, many }) => ({
+  cover: one(media, {
+    fields: [courses.cover],
+    references: [media.id],
+    relationName: "cover",
+  }),
+  outcomes: many(courses_outcomes, {
+    relationName: "outcomes",
+  }),
+  requirements: many(courses_requirements, {
+    relationName: "requirements",
+  }),
+  modules: many(courses_modules, {
+    relationName: "modules",
+  }),
+  category: one(categories, {
+    fields: [courses.category],
+    references: [categories.id],
+    relationName: "category",
+  }),
+  _locales: many(courses_locales, {
+    relationName: "_locales",
+  }),
+  _rels: many(courses_rels, {
+    relationName: "_rels",
+  }),
+}));
+export const relations__courses_v_version_outcomes = relations(
+  _courses_v_version_outcomes,
+  ({ one }) => ({
+    _parentID: one(_courses_v, {
+      fields: [_courses_v_version_outcomes._parentID],
+      references: [_courses_v.id],
+      relationName: "version_outcomes",
+    }),
+  }),
+);
+export const relations__courses_v_version_requirements = relations(
+  _courses_v_version_requirements,
+  ({ one }) => ({
+    _parentID: one(_courses_v, {
+      fields: [_courses_v_version_requirements._parentID],
+      references: [_courses_v.id],
+      relationName: "version_requirements",
+    }),
+  }),
+);
+export const relations__courses_v_version_modules_locales = relations(
+  _courses_v_version_modules_locales,
+  ({ one }) => ({
+    _parentID: one(_courses_v_version_modules, {
+      fields: [_courses_v_version_modules_locales._parentID],
+      references: [_courses_v_version_modules.id],
+      relationName: "_locales",
+    }),
+  }),
+);
+export const relations__courses_v_version_modules = relations(
+  _courses_v_version_modules,
+  ({ one, many }) => ({
+    _parentID: one(_courses_v, {
+      fields: [_courses_v_version_modules._parentID],
+      references: [_courses_v.id],
+      relationName: "version_modules",
+    }),
+    _locales: many(_courses_v_version_modules_locales, {
+      relationName: "_locales",
+    }),
+  }),
+);
+export const relations__courses_v_locales = relations(
+  _courses_v_locales,
+  ({ one }) => ({
+    _parentID: one(_courses_v, {
+      fields: [_courses_v_locales._parentID],
+      references: [_courses_v.id],
+      relationName: "_locales",
+    }),
+    version_meta_image: one(media, {
+      fields: [_courses_v_locales.version_meta_image],
+      references: [media.id],
+      relationName: "version_meta_image",
+    }),
+  }),
+);
+export const relations__courses_v_rels = relations(
+  _courses_v_rels,
+  ({ one }) => ({
+    parent: one(_courses_v, {
+      fields: [_courses_v_rels.parent],
+      references: [_courses_v.id],
+      relationName: "_rels",
+    }),
+    lessonsID: one(lessons, {
+      fields: [_courses_v_rels.lessonsID],
+      references: [lessons.id],
+      relationName: "lessons",
+    }),
+    instructorsID: one(instructors, {
+      fields: [_courses_v_rels.instructorsID],
+      references: [instructors.id],
+      relationName: "instructors",
+    }),
+    adminsID: one(admins, {
+      fields: [_courses_v_rels.adminsID],
+      references: [admins.id],
+      relationName: "admins",
+    }),
+  }),
+);
+export const relations__courses_v = relations(_courses_v, ({ one, many }) => ({
+  parent: one(courses, {
+    fields: [_courses_v.parent],
+    references: [courses.id],
+    relationName: "parent",
+  }),
+  version_cover: one(media, {
+    fields: [_courses_v.version_cover],
+    references: [media.id],
+    relationName: "version_cover",
+  }),
+  version_outcomes: many(_courses_v_version_outcomes, {
+    relationName: "version_outcomes",
+  }),
+  version_requirements: many(_courses_v_version_requirements, {
+    relationName: "version_requirements",
+  }),
+  version_modules: many(_courses_v_version_modules, {
+    relationName: "version_modules",
+  }),
+  version_category: one(categories, {
+    fields: [_courses_v.version_category],
+    references: [categories.id],
+    relationName: "version_category",
+  }),
+  _locales: many(_courses_v_locales, {
+    relationName: "_locales",
+  }),
+  _rels: many(_courses_v_rels, {
+    relationName: "_rels",
+  }),
+}));
+export const relations_lessons_locales = relations(
+  lessons_locales,
+  ({ one }) => ({
+    _parentID: one(lessons, {
+      fields: [lessons_locales._parentID],
+      references: [lessons.id],
+      relationName: "_locales",
+    }),
+    meta_image: one(media, {
+      fields: [lessons_locales.meta_image],
+      references: [media.id],
+      relationName: "meta_image",
+    }),
+  }),
+);
+export const relations_lessons_rels = relations(lessons_rels, ({ one }) => ({
+  parent: one(lessons, {
+    fields: [lessons_rels.parent],
+    references: [lessons.id],
+    relationName: "_rels",
+  }),
+  adminsID: one(admins, {
+    fields: [lessons_rels.adminsID],
+    references: [admins.id],
+    relationName: "admins",
+  }),
+}));
+export const relations_lessons = relations(lessons, ({ one, many }) => ({
+  course: one(courses, {
+    fields: [lessons.course],
+    references: [courses.id],
+    relationName: "course",
+  }),
+  _locales: many(lessons_locales, {
+    relationName: "_locales",
+  }),
+  _rels: many(lessons_rels, {
+    relationName: "_rels",
+  }),
+}));
+export const relations__lessons_v_locales = relations(
+  _lessons_v_locales,
+  ({ one }) => ({
+    _parentID: one(_lessons_v, {
+      fields: [_lessons_v_locales._parentID],
+      references: [_lessons_v.id],
+      relationName: "_locales",
+    }),
+    version_meta_image: one(media, {
+      fields: [_lessons_v_locales.version_meta_image],
+      references: [media.id],
+      relationName: "version_meta_image",
+    }),
+  }),
+);
+export const relations__lessons_v_rels = relations(
+  _lessons_v_rels,
+  ({ one }) => ({
+    parent: one(_lessons_v, {
+      fields: [_lessons_v_rels.parent],
+      references: [_lessons_v.id],
+      relationName: "_rels",
+    }),
+    adminsID: one(admins, {
+      fields: [_lessons_v_rels.adminsID],
+      references: [admins.id],
+      relationName: "admins",
+    }),
+  }),
+);
+export const relations__lessons_v = relations(_lessons_v, ({ one, many }) => ({
+  parent: one(lessons, {
+    fields: [_lessons_v.parent],
+    references: [lessons.id],
+    relationName: "parent",
+  }),
+  version_course: one(courses, {
+    fields: [_lessons_v.version_course],
+    references: [courses.id],
+    relationName: "version_course",
+  }),
+  _locales: many(_lessons_v_locales, {
+    relationName: "_locales",
+  }),
+  _rels: many(_lessons_v_rels, {
+    relationName: "_rels",
+  }),
+}));
+export const relations_categories_locales = relations(
+  categories_locales,
+  ({ one }) => ({
+    _parentID: one(categories, {
+      fields: [categories_locales._parentID],
+      references: [categories.id],
+      relationName: "_locales",
+    }),
+  }),
+);
+export const relations_categories_rels = relations(
+  categories_rels,
+  ({ one }) => ({
+    parent: one(categories, {
+      fields: [categories_rels.parent],
+      references: [categories.id],
+      relationName: "_rels",
+    }),
+    adminsID: one(admins, {
+      fields: [categories_rels.adminsID],
+      references: [admins.id],
+      relationName: "admins",
+    }),
+  }),
+);
+export const relations_categories = relations(categories, ({ many }) => ({
+  _locales: many(categories_locales, {
+    relationName: "_locales",
+  }),
+  _rels: many(categories_rels, {
+    relationName: "_rels",
+  }),
+}));
+export const relations__categories_v_locales = relations(
+  _categories_v_locales,
+  ({ one }) => ({
+    _parentID: one(_categories_v, {
+      fields: [_categories_v_locales._parentID],
+      references: [_categories_v.id],
+      relationName: "_locales",
+    }),
+  }),
+);
+export const relations__categories_v_rels = relations(
+  _categories_v_rels,
+  ({ one }) => ({
+    parent: one(_categories_v, {
+      fields: [_categories_v_rels.parent],
+      references: [_categories_v.id],
+      relationName: "_rels",
+    }),
+    adminsID: one(admins, {
+      fields: [_categories_v_rels.adminsID],
+      references: [admins.id],
+      relationName: "admins",
+    }),
+  }),
+);
+export const relations__categories_v = relations(
+  _categories_v,
+  ({ one, many }) => ({
+    parent: one(categories, {
+      fields: [_categories_v.parent],
+      references: [categories.id],
+      relationName: "parent",
+    }),
+    _locales: many(_categories_v_locales, {
+      relationName: "_locales",
+    }),
+    _rels: many(_categories_v_rels, {
+      relationName: "_rels",
+    }),
+  }),
+);
+export const relations_instructors_links = relations(
+  instructors_links,
+  ({ one }) => ({
+    _parentID: one(instructors, {
+      fields: [instructors_links._parentID],
+      references: [instructors.id],
+      relationName: "links",
+    }),
+  }),
+);
+export const relations_instructors_locales = relations(
+  instructors_locales,
+  ({ one }) => ({
+    _parentID: one(instructors, {
+      fields: [instructors_locales._parentID],
+      references: [instructors.id],
+      relationName: "_locales",
+    }),
+  }),
+);
+export const relations_instructors_rels = relations(
+  instructors_rels,
+  ({ one }) => ({
+    parent: one(instructors, {
+      fields: [instructors_rels.parent],
+      references: [instructors.id],
+      relationName: "_rels",
+    }),
+    adminsID: one(admins, {
+      fields: [instructors_rels.adminsID],
+      references: [admins.id],
+      relationName: "admins",
+    }),
+  }),
+);
+export const relations_instructors = relations(
+  instructors,
+  ({ one, many }) => ({
+    photo: one(media, {
+      fields: [instructors.photo],
+      references: [media.id],
+      relationName: "photo",
+    }),
+    links: many(instructors_links, {
+      relationName: "links",
+    }),
+    _locales: many(instructors_locales, {
+      relationName: "_locales",
+    }),
+    _rels: many(instructors_rels, {
+      relationName: "_rels",
+    }),
+  }),
+);
+export const relations__instructors_v_version_links = relations(
+  _instructors_v_version_links,
+  ({ one }) => ({
+    _parentID: one(_instructors_v, {
+      fields: [_instructors_v_version_links._parentID],
+      references: [_instructors_v.id],
+      relationName: "version_links",
+    }),
+  }),
+);
+export const relations__instructors_v_locales = relations(
+  _instructors_v_locales,
+  ({ one }) => ({
+    _parentID: one(_instructors_v, {
+      fields: [_instructors_v_locales._parentID],
+      references: [_instructors_v.id],
+      relationName: "_locales",
+    }),
+  }),
+);
+export const relations__instructors_v_rels = relations(
+  _instructors_v_rels,
+  ({ one }) => ({
+    parent: one(_instructors_v, {
+      fields: [_instructors_v_rels.parent],
+      references: [_instructors_v.id],
+      relationName: "_rels",
+    }),
+    adminsID: one(admins, {
+      fields: [_instructors_v_rels.adminsID],
+      references: [admins.id],
+      relationName: "admins",
+    }),
+  }),
+);
+export const relations__instructors_v = relations(
+  _instructors_v,
+  ({ one, many }) => ({
+    parent: one(instructors, {
+      fields: [_instructors_v.parent],
+      references: [instructors.id],
+      relationName: "parent",
+    }),
+    version_photo: one(media, {
+      fields: [_instructors_v.version_photo],
+      references: [media.id],
+      relationName: "version_photo",
+    }),
+    version_links: many(_instructors_v_version_links, {
+      relationName: "version_links",
+    }),
+    _locales: many(_instructors_v_locales, {
+      relationName: "_locales",
+    }),
+    _rels: many(_instructors_v_rels, {
+      relationName: "_rels",
+    }),
+  }),
+);
 export const relations_pages_locales = relations(pages_locales, ({ one }) => ({
   _parentID: one(pages, {
     fields: [pages_locales._parentID],
@@ -3430,6 +5082,26 @@ export const relations_payload_locked_documents_rels = relations(
       references: [payload_locked_documents.id],
       relationName: "_rels",
     }),
+    coursesID: one(courses, {
+      fields: [payload_locked_documents_rels.coursesID],
+      references: [courses.id],
+      relationName: "courses",
+    }),
+    lessonsID: one(lessons, {
+      fields: [payload_locked_documents_rels.lessonsID],
+      references: [lessons.id],
+      relationName: "lessons",
+    }),
+    categoriesID: one(categories, {
+      fields: [payload_locked_documents_rels.categoriesID],
+      references: [categories.id],
+      relationName: "categories",
+    }),
+    instructorsID: one(instructors, {
+      fields: [payload_locked_documents_rels.instructorsID],
+      references: [instructors.id],
+      relationName: "instructors",
+    }),
     pagesID: one(pages, {
       fields: [payload_locked_documents_rels.pagesID],
       references: [pages.id],
@@ -3853,6 +5525,14 @@ export const relations_payload_jobs_stats = relations(
 
 type DatabaseSchema = {
   enum__locales: typeof enum__locales;
+  enum_courses_level: typeof enum_courses_level;
+  enum_courses_status: typeof enum_courses_status;
+  enum__courses_v_version_level: typeof enum__courses_v_version_level;
+  enum__courses_v_published_locale: typeof enum__courses_v_published_locale;
+  enum__courses_v_version_status: typeof enum__courses_v_version_status;
+  enum_lessons_status: typeof enum_lessons_status;
+  enum__lessons_v_published_locale: typeof enum__lessons_v_published_locale;
+  enum__lessons_v_version_status: typeof enum__lessons_v_version_status;
   enum_pages_status: typeof enum_pages_status;
   enum__pages_v_published_locale: typeof enum__pages_v_published_locale;
   enum__pages_v_version_status: typeof enum__pages_v_version_status;
@@ -3877,6 +5557,40 @@ type DatabaseSchema = {
   enum__header_v_version_nav_items_link_type: typeof enum__header_v_version_nav_items_link_type;
   enum_footer_nav_items_link_type: typeof enum_footer_nav_items_link_type;
   enum__footer_v_version_nav_items_link_type: typeof enum__footer_v_version_nav_items_link_type;
+  courses_outcomes: typeof courses_outcomes;
+  courses_requirements: typeof courses_requirements;
+  courses_modules: typeof courses_modules;
+  courses_modules_locales: typeof courses_modules_locales;
+  courses: typeof courses;
+  courses_locales: typeof courses_locales;
+  courses_rels: typeof courses_rels;
+  _courses_v_version_outcomes: typeof _courses_v_version_outcomes;
+  _courses_v_version_requirements: typeof _courses_v_version_requirements;
+  _courses_v_version_modules: typeof _courses_v_version_modules;
+  _courses_v_version_modules_locales: typeof _courses_v_version_modules_locales;
+  _courses_v: typeof _courses_v;
+  _courses_v_locales: typeof _courses_v_locales;
+  _courses_v_rels: typeof _courses_v_rels;
+  lessons: typeof lessons;
+  lessons_locales: typeof lessons_locales;
+  lessons_rels: typeof lessons_rels;
+  _lessons_v: typeof _lessons_v;
+  _lessons_v_locales: typeof _lessons_v_locales;
+  _lessons_v_rels: typeof _lessons_v_rels;
+  categories: typeof categories;
+  categories_locales: typeof categories_locales;
+  categories_rels: typeof categories_rels;
+  _categories_v: typeof _categories_v;
+  _categories_v_locales: typeof _categories_v_locales;
+  _categories_v_rels: typeof _categories_v_rels;
+  instructors_links: typeof instructors_links;
+  instructors: typeof instructors;
+  instructors_locales: typeof instructors_locales;
+  instructors_rels: typeof instructors_rels;
+  _instructors_v_version_links: typeof _instructors_v_version_links;
+  _instructors_v: typeof _instructors_v;
+  _instructors_v_locales: typeof _instructors_v_locales;
+  _instructors_v_rels: typeof _instructors_v_rels;
   pages: typeof pages;
   pages_locales: typeof pages_locales;
   pages_rels: typeof pages_rels;
@@ -3956,6 +5670,40 @@ type DatabaseSchema = {
   _brand_v_locales: typeof _brand_v_locales;
   _brand_v_rels: typeof _brand_v_rels;
   payload_jobs_stats: typeof payload_jobs_stats;
+  relations_courses_outcomes: typeof relations_courses_outcomes;
+  relations_courses_requirements: typeof relations_courses_requirements;
+  relations_courses_modules_locales: typeof relations_courses_modules_locales;
+  relations_courses_modules: typeof relations_courses_modules;
+  relations_courses_locales: typeof relations_courses_locales;
+  relations_courses_rels: typeof relations_courses_rels;
+  relations_courses: typeof relations_courses;
+  relations__courses_v_version_outcomes: typeof relations__courses_v_version_outcomes;
+  relations__courses_v_version_requirements: typeof relations__courses_v_version_requirements;
+  relations__courses_v_version_modules_locales: typeof relations__courses_v_version_modules_locales;
+  relations__courses_v_version_modules: typeof relations__courses_v_version_modules;
+  relations__courses_v_locales: typeof relations__courses_v_locales;
+  relations__courses_v_rels: typeof relations__courses_v_rels;
+  relations__courses_v: typeof relations__courses_v;
+  relations_lessons_locales: typeof relations_lessons_locales;
+  relations_lessons_rels: typeof relations_lessons_rels;
+  relations_lessons: typeof relations_lessons;
+  relations__lessons_v_locales: typeof relations__lessons_v_locales;
+  relations__lessons_v_rels: typeof relations__lessons_v_rels;
+  relations__lessons_v: typeof relations__lessons_v;
+  relations_categories_locales: typeof relations_categories_locales;
+  relations_categories_rels: typeof relations_categories_rels;
+  relations_categories: typeof relations_categories;
+  relations__categories_v_locales: typeof relations__categories_v_locales;
+  relations__categories_v_rels: typeof relations__categories_v_rels;
+  relations__categories_v: typeof relations__categories_v;
+  relations_instructors_links: typeof relations_instructors_links;
+  relations_instructors_locales: typeof relations_instructors_locales;
+  relations_instructors_rels: typeof relations_instructors_rels;
+  relations_instructors: typeof relations_instructors;
+  relations__instructors_v_version_links: typeof relations__instructors_v_version_links;
+  relations__instructors_v_locales: typeof relations__instructors_v_locales;
+  relations__instructors_v_rels: typeof relations__instructors_v_rels;
+  relations__instructors_v: typeof relations__instructors_v;
   relations_pages_locales: typeof relations_pages_locales;
   relations_pages_rels: typeof relations_pages_rels;
   relations_pages: typeof relations_pages;

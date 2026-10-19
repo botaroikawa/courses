@@ -1,16 +1,16 @@
 import type { CollectionConfig } from 'payload'
 
-import { isAdmin, never } from '@/access'
+import { canManageStudents, never } from '@/access'
 
 // Better Auth `verification` model: email verification, magic link and password reset tokens
 export const Verifications: CollectionConfig = {
   slug: 'verifications',
   admin: { hidden: true },
   access: {
-    read: isAdmin,
+    read: canManageStudents,
     create: () => false,
     update: () => false,
-    delete: isAdmin,
+    delete: canManageStudents,
   },
   fields: [
     { name: 'identifier', type: 'text', required: true, index: true },

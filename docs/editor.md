@@ -33,7 +33,7 @@ A block is not done until each point is settled:
 
 1. Config in the shared editor, and whether `pages` gets it.
 2. Renderer, server-rendered unless it needs interactivity.
-3. Reading time: whether it contributes (only text and video do today).
+3. Reading time: whether it contributes. Text nodes count wherever they sit, rich text inside a block included; other block fields do not (`src/lib/reading-time.ts`). The Video block must add its file's `duration` through the lessons' reading-time hook.
 4. Translation: which fields carry translatable text, so AI translation handles them.
 5. Reduced motion, if anything moves.
 6. UI strings in `messages/{en,es,ca}.json`.
