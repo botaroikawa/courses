@@ -4,6 +4,19 @@
 
 Course platform: one Next.js app with Payload v4 (beta) embedded. Setup and scripts: README.md.
 
+## Documentation
+
+`docs/` holds product and technical context: why things are the way they are, the invariants the code keeps, and what a change touches. Code is the source of truth for fields and APIs; docs describe the current product and its intended direction, not a log of decisions.
+
+Read the doc before changing its area:
+
+- `docs/product.md`: people and roles, concepts (course, lesson, enrollment, progress, quiz), access, journeys, languages, SEO, planned work.
+- `docs/content-model.md`: collections, relationships, invariants, localization strategy, student data, deletions.
+- `docs/editor.md`: the shared Lexical editor and its blocks, table of contents, reading time, checklist for adding a block.
+- `docs/media.md`: files, visibility, video, paid-access plan.
+
+Update the doc in the same change as the code. When a product change contradicts a doc, rewrite the doc to the new truth and follow every seam it lists, so nothing is left half-migrated. A new area gets its own doc and a line here.
+
 ## Data ownership
 
 Payload owns every table and every migration, including Better Auth's. Two kinds of people:
